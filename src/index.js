@@ -31,7 +31,6 @@ app.get('/', (req, res) => {
   res.send('Welcome to my REST api!');
 });
 
-
 // Get all items in the items-list: GET http://127.0.0.1:3000/items
 app.get('/items', (req, res) => {
   res.json(items);
@@ -43,28 +42,22 @@ app.post('/items/:newItemName', (req, res) => {
   const newIdNumber = items.length + 1;
   const newItem = {id: newIdNumber, name: nameFromUrl};
 
-  res.send('POST Request Called');
+  res.status(200).send('New item id: ' + newItem['id']);
   items.push(newItem);
   console.log('New item added: ', newItem);
-  console.log(items);
 });
-
 
 // Return a specific item name based on requested id number: GET http://127.0.0.1:3000/items/<id>
 app.get('/items/:id', (req, res) => {
   // Parse the URL for the number of the item
   const requestedItemId = parseInt(req.params.id);
-  let result = 'There is no item with that ID';
+  const foundItem = items.find(({id}) => id === requestedItemId);
 
-  for (let i = 0; i < items.length; i++) {
-    // Define every id based on the iteration
-    const itemId = items[i]['id'];
-
-    if (requestedItemId === itemId) {
-      result = items[i]['name'];
-    }
+  if (foundItem) {
+    res.json(foundItem);
+  } else {
+    res.status(404).json({error: 'Item not found'});
   }
-  res.json({name: result});
 });
 
 // Start the server
