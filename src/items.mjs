@@ -6,40 +6,71 @@ const items = [
   {id: 4, name: 'Item4'},
 ];
 
+// Root
+const showRoot = (req, res) => {
+  res.send('Welcome to my REST api!');
+};
+
+// List items
 const getItems = (req, res) => {
   res.json(items);
 };
 
+// Get specific item
 const getItemById = (req, res) => {
-  // Parse the URL for the number of the item
-  const requestedItemId = parseInt(req.params.id);
-  const foundItem = items.find(({id}) => id === requestedItemId);
-
+  const requestedItemId = req.params.id;
+  const foundItem = items.find(({id}) => id == requestedItemId);
   if (foundItem) {
+    // Case: Request OK
     res.json(foundItem);
   } else {
+    // Case: Id not found
     res.status(404).json({error: 'Item not found'});
   }
 };
 
+// Add item
 const postItem = (req, res) => {
-  const nameFromUrl = req.params.newItemName;
-  const newIdNumber = items.length + 1;
-  const newItem = {id: newIdNumber, name: nameFromUrl};
-
-  res.status(200).send('New item id: ' + newItem['id']);
+  // Case: Bad request
+  if (!req.body.name) {
+    return res.status(400).json({error: 'Item name missing'});
+  }
+  // Case: Request OK - Use rolling ID counter
+  const newId = items[items.length-1].id + 1;
+  const newItem = {name: req.body.name, id: newId};
   items.push(newItem);
-  console.log('New item added: ', newItem);
+  res.status(201).json({message: 'item created'});
 };
 
-const deleteItem = (req, res) => {
-  // TODO implement delete
-  res.json({message: 'DELETE placeholder'});
-};
-
+// Update item
 const putItem = (req, res) => {
-  // TODO implement put
-  res.json({message: 'PUT placeholder'});
+  const index = items.findIndex((item) => item.id == req.params.id);
+  // Case: id not found
+  if (index === -1) {
+    return res.sendStatus(404).json({message: 'No item found'});
+  }
+  // Case: bad request
+  if (!req.body.name) {
+    return res.status(400).json({error: 'Item name missing'});
+  }
+  // Case: Request OK
+  items[index].name = req.body.name;
+  res.json({message: items[index]});
 };
 
-export {getItems, getItemById, postItem, deleteItem, putItem};
+// Delete item
+const deleteItem = (req, res) => {
+  const index = items.findIndex((item) => item.id == req.params.id);
+
+  // Case: Id not found
+  if (index === -1) {
+    return res.sendStatus(404).json({message: 'No item found'});
+  }
+  // Case: Request OK
+  const deletedItems = items.splice(index, 1);
+  console.log('deleted item: ', deletedItems);
+  res.sendStatus(204);
+};
+
+
+export {showRoot, getItems, getItemById, postItem, deleteItem, putItem};
