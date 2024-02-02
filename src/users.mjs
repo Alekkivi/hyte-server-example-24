@@ -63,6 +63,7 @@ const putUser = (req, res) => {
     console.log('meni');
     return res.status(404).json({message: 'No user found'});
   }
+
   // Case: bad request
   if (!req.body.username || !req.body.password || !req.body.email) {
     return res.status(400).json({
