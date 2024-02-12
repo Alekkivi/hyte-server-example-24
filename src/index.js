@@ -2,21 +2,17 @@
 import express from 'express';
 import path from 'path';
 import {fileURLToPath} from 'url';
-import {
-  deleteItem,
-  getItemById,
-  getItems,
-  postItem,
-  putItem,
-  showRoot,
-} from './items.mjs';
-// import exp from 'constants';
-import {getUserById, getUsers, postLogIn, postUser, putUser} from './users.mjs';
+import cors from 'cors';
+import itemRouter from './routes/item-router.mjs';
+import userRouter from './routes/user-router.mjs';
+import entryRouter from './routes/entry-router.mjs';
 
 // Define the host
 const hostname = '127.0.0.1';
 const port = 3000;
 const app = express();
+
+app.use(cors());
 app.use(express.json());
 
 // Staattinen sivusto palvelimen juureen
@@ -29,42 +25,14 @@ const __dirname = path.dirname(__filename);
 // Tarjoiltava kansio määritellään ns. Relatiivisella polulla
 app.use('/sivusto', express.static(path.join(__dirname, '../public')));
 
-// ---------- Items resource ------------ //
-
 // Root
-app.get('/', showRoot);
+// app.get('/', showRoot);
 
-// List items - GET http://127.0.0.1:3000/items
-app.get('/items', getItems);
+app.use('/items', itemRouter);
 
-// Get specific item - GET http://127.0.0.1:3000/items/<id>
-app.get('/items/:id', getItemById);
+app.use('/users', userRouter);
 
-// Add item - POST http://127.0.0.1:3000/items
-app.post('/items', postItem);
-
-// Update item - PUT http://127.0.0.1:3000/items/<id>
-app.put('/items/:id', putItem);
-
-// Delete item - DELELTE http://127.0.0.1:3000/items/<id>
-app.delete('/items/:id', deleteItem);
-
-// ---------- Users resource ------------ //
-
-// List user - GET http://127.0.0.1:3000/users
-app.get('/users', getUsers);
-
-// Get specific user - GET http://127.0.0.1:3000/users/<id>
-app.get('/users/:id', getUserById);
-
-// Register user - POST http://127.0.0.1:3000/users
-app.post('/users', postUser);
-
-// Update user - PUT http://127.0.0.1:3000/users/<id>
-app.put('/users/:id', putUser);
-
-// Login user - POST http://127.0.0.1:3000/users/login
-app.post('/users/login', postLogIn);
+app.use('/entries', entryRouter);
 
 // Start the server
 app.listen(port, hostname, () => {
