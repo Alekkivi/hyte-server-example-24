@@ -3,7 +3,7 @@
 ## Description
 This is a server made with Node.Js and Express
 
-start dev server: `bno ryb dev` / `npm start`
+start dev server: `npm run dev` / `npm start`
 
 
 | Endpoint      | Method | Description                                        | Request Body (Example)            | Response Body (Example)        | Status Codes                         |
