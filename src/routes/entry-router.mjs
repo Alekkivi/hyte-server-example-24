@@ -5,6 +5,7 @@ import {
   putEntry,
   deleteEntry,
 } from '../controllers/entry-controller.mjs';
+import {authenticateToken} from '../middlewares/authentication.mjs';
 
 // eslint-disable-next-line new-cap
 const entryRouter = express.Router();
@@ -12,7 +13,7 @@ const entryRouter = express.Router();
 // /entries endpoint
 entryRouter
     .route('/')
-    .get(getEntries);
+    .get(authenticateToken, getEntries);
 
 // /entries/:id endpoint
 entryRouter

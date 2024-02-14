@@ -3,7 +3,6 @@ import {
   getUserById,
   getUsers,
   postUser,
-  postLogin,
   putUser,
   deleteUser,
 } from '../controllers/user-controller.mjs';
@@ -28,7 +27,5 @@ userRouter
     // delete user based on id
     .delete(deleteUser);
 
-// user login
-userRouter.post('/login', postLogin);
 
 export default userRouter;

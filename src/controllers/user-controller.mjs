@@ -7,9 +7,6 @@ import {
   updateUserById,
 } from '../models/user-model.mjs';
 
-// TODO: implement route handlers below for users (real data)
-
-
 // GET all users
 const getUsers = async (req, res) => {
   const result = await listAllUsers();
@@ -60,7 +57,6 @@ const putUser = async (req, res) => {
   }
 };
 
-
 // DELETE user
 const deleteUser = async (req, res) => {
   const result = await deleteUserById(req.params.id);
@@ -70,23 +66,30 @@ const deleteUser = async (req, res) => {
   return res.json(result);
 };
 
-// Dummy login with mock data, returns user object if username & password match
-const postLogin = (req, res) => {
-  const userCreds = req.body;
-  if (!userCreds.username || !userCreds.password) {
-    return res.sendStatus(400);
-  }
-  const userFound = users.find((user) => user.username == userCreds.username);
-  // user not found
-  if (!userFound) {
-    return res.status(403).json({error: 'username/password invalid'});
-  }
-  // check if posted password matches to user found password
-  if (userFound.password === userCreds.password) {
-    res.json({message: 'logged in successfully', user: userFound});
-  } else {
-    return res.status(403).json({error: 'username/password invalid'});
+// Used for login
+const selectUserByNameAndPassword = async (username, password) => {
+  try {
+    const sql = 'SELECT * FROM Users WHERE username=? AND password=?';
+    const params = [username, password];
+    const [rows] = await promisePool.query(sql, params);
+    // if nothing is found with the username and password
+    if (rows.length === 0) {
+      return {error: 401, message: 'invalid username or password'};
+    }
+    // remove password property from the result and return the user object
+    delete rows[0].password;
+    return rows[0];
+  } catch (error) {
+    console.error('selectUserByNameAndPassword', error);
+    return {error: 500, message: 'db error'};
   }
 };
 
-export {getUsers, getUserById, postUser, putUser, postLogin, deleteUser};
+export {
+  getUsers,
+  selectUserByNameAndPassword,
+  getUserById,
+  postUser,
+  putUser,
+  deleteUser,
+};
