@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 /* eslint-disable camelcase */
 import {
   deleteUserById,
@@ -7,31 +8,46 @@ import {
   updateUserById,
 } from '../models/user-model.mjs';
 
-// GET all users
+// GET all users - FOR ADMIN
 const getUsers = async (req, res) => {
-  const result = await listAllUsers();
-  if (result.error) {
-    return res.status(result.error).json(result);
+  if (req.user.user_level === 'admin') {
+    const result = await listAllUsers();
+    if (result.error) {
+      return res.status(result.error).json(result);
+    }
+    return res.json(result);
+  } else {
+    return res.status(401).json({error: 401, message: 'Unauthorized'});
   }
-  return res.json(result);
 };
 
-// GET specific user
+// GET specific user - FOR BOTH
 const getUserById = async (req, res) => {
-  const result = await selectUserById(req.params.id);
-  if (result.error) {
-    return res.status(result.error).json(result);
+  if (req.user.user_level === 'admin' || req.user.user_id == req.params.id) {
+    const result = await selectUserById(req.params.id);
+    if (result.error) {
+      return res.status(result.error).json(result);
+    }
+    return res.json(result);
+  } else {
+    return res.status(401).json({error: 401, message: 'Unauthorized'});
   }
-  return res.json(result);
 };
 
-// POST create a new user
+
+// POST create a new user - FOR BOTH
 const postUser = async (req, res) => {
   const {username, password, email} = req.body;
 
   // check that all needed fields are included in request
   if (username && password && email) {
-    const result = await insertUser(req.body);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    const result = await insertUser({
+      username,
+      email,
+      password: hashedPassword,
+    });
     if (result.error) {
       return res.status(result.error).json(result);
     }
@@ -41,13 +57,21 @@ const postUser = async (req, res) => {
   }
 };
 
-// PUT, update existing user
+// PUT, update existing user - FOR BOTH
 const putUser = async (req, res) => {
-  const user_id = req.params.id;
+  const user_id = req.user.user_id;
   const {username, password, email} = req.body;
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
   // check that all needed fields are included in request
   if (user_id && username && password && email) {
-    const result = await updateUserById({user_id, ...req.body});
+    const result = await updateUserById({
+      user_id,
+      username,
+      password: hashedPassword,
+      email,
+    });
     if (result.error) {
       return res.status(result.error).json(result);
     }
@@ -57,14 +81,19 @@ const putUser = async (req, res) => {
   }
 };
 
-// DELETE user
+// DELETE user - FOR BOTH
 const deleteUser = async (req, res) => {
-  const result = await deleteUserById(req.params.id);
-  if (result.error) {
-    return res.status(result.error).json(result);
+  if (req.user.user_level === 'admin' || req.user.user_id == req.params.id) {
+    const result = await deleteUserById(req.params.id);
+    if (result.error) {
+      return res.status(result.error).json(result);
+    }
+    return res.json(result);
+  } else {
+    return res.status(401).json({error: 401, message: 'Unauthorized'});
   }
-  return res.json(result);
 };
+
 
 // Used for login
 const selectUserByNameAndPassword = async (username, password) => {

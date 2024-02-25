@@ -2,22 +2,77 @@
 
 ## Description
 This is a server made with Node.Js and Express
-
-start dev server: `bno ryb dev` / `npm start`
-
-
-| Endpoint      | Method | Description                                        | Request Body (Example)            | Response Body (Example)        | Status Codes                         |
-|---------------|--------|----------------------------------------------------|----------------------------------|--------------------------------|-------------------------------------|
-| `/items`      | GET    | Retrieve a list of all items                       | N/A                              | `[{ "id": 1, "name": "Item1" }, { "id": 2, "name": "Item2" }]` | `200 OK`, `404 Not Found`           |
-| `/items`      | POST   | Create a new item                                  | `{ "name": "New Item" }`         | `{ "id": 3, "name": "New Item" }` | `201 Created`, `400 Bad Request`    |
-| `/items/:id`  | GET    | Retrieve details of a specific item by its ID      | N/A                              | `{ "id": 1, "name": "Item1" }`  | `200 OK`, `404 Not Found`           |
-| `/items/:id`  | PUT    | Update details of a specific item by its ID        | `{ "name": "Updated Item" }`     | `{ "id": 1, "name": "Updated Item" }` | `200 OK`, `400 Bad Request`, `404 Not Found` |
-| `/items/:id`  | DELETE | Delete a specific item by its ID                   | N/A                              | N/A                            | `204 No Content`, `404 Not Found`    |
+start dev server: `npm run dev` / `npm start`
 
 
-| Endpoint      | Method | Description                                        | Request Body (Example)            | Response Body (Example)        | Status Codes                         |
-|---------------|--------|----------------------------------------------------|----------------------------------|--------------------------------|-------------------------------------|
-| `/users`      | GET    | Retrieve a list of all users                       | N/A                              | `[{ "id": 1, "name": "Item1" }, { "id": 2, "name": "Item2" }]` | `200 OK`, `404 Not Found`           |
-| `/users`      | POST   | Create a new user                                  | `{ "username": "uname" }, {"password":" "pword" } , {"email": "email@api.org"}`         | `{"message": 'User created', "new_user": {"id":"id", "username":"uname", "password":"pword","email":"email"}}` | `201 Created`, `400 Bad Request`    |
-| `/users/:id`  | GET    | Retrieve details of a specific user by its ID      | N/A                              | `{ "id": 1, "username": "uname" , "password": "pword", "email":"email@api.org"}`  | `200 OK`, `404 Not Found`           |
-| `/users/:id`  | PUT    | Update details of a specific user by its ID        | `{ "name": "Updated Item" }`     | `{ "message":{ "id": 1, "username": "uname" , "password": "pword", "email":"email@api.org"}  }` | `200 OK`, `400 Bad Request`, `404 Not Found` |
+## Users
+### Create a new user
+POST http://127.0.0.1:3000/api/users
+Example request formatting:
+{
+    "username":"example_username",
+    "password":"example_password",
+    "email":"example@email.com"
+}
+
+### Log in to a existing user
+POST http://127.0.0.1:3000/api/auth/login
+Example request formatting:
+{
+    "username":"example_username",
+    "password":"example_password"
+}
+Successfull login will return information about the user. Including the token.
+
+### Get user info with token (Requires token)
+GET http://127.0.0.1:3000/api/auth/me
+
+### Get all users (requires admin token)
+GET http://127.0.0.1:3000/api/users
+
+### Update user information (requires regular token)
+POST http://127.0.0.1:3000/api/users
+{
+    "username":"new_username",
+    "password":"new_password",
+    "email":"new@email.com"
+}
+
+### Delete user (requires token)
+With regular token you can only delete your own user profile
+With admin token you can delete any user
+
+
+## Entries
+### Get all entries (Requires regular token)
+GET http://127.0.0.1:3000/api/entries
+
+Returned data varies based on user level
+If the token is attached to a admin user
+--> All entries in db are returned
+
+else
+--> All entries belonging to the user are returned
+
+### Get specific user entires (Requires admin token)
+GET http://127.0.0.1:3000/api/entries/id
+where id is the user_id of a specific user
+
+### Update a specific entry using entry_date (requires regular token)
+PUT http://127.0.0.1:3000/api/entries/id
+Example request formatting:
+{
+    "entry_date":"2012-12-12",
+    "mood":"Hopefull",
+    "weight":"55",
+    "sleep_hours": "6",
+    "notes":"This actually works??"
+}
+The example request will update the diary entry with corresponding entry_date
+
+### Delete a specific entry using entry_id (requires token)
+DELETE http://127.0.0.1:3000/api/entries/id
+Where id is the entry_id of a specific entry
+
+Regular user can only remove diary entries that they have made
+With admin token you can delete any diary entry based on id from the URL

@@ -27,14 +27,12 @@ const __dirname = path.dirname(__filename);
 // Tarjoiltava kansio määritellään ns. Relatiivisella polulla
 app.use('/sivusto', express.static(path.join(__dirname, '../public')));
 
-// Logger middleware
+// Logger middleware, Prints out every call to the api
 app.use(logger);
+
 app.use('/items', itemRouter);
-
 app.use('/api/users', userRouter);
-
 app.use('/api/entries', entryRouter);
-
 app.use('/api/auth', authRouter);
 
 // Start the server
