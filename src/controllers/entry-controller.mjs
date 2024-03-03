@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import {
+  addEntry,
   listAllEntries,
   selectEntryById,
   updateEntryById,
@@ -7,9 +8,10 @@ import {
   deleteEntryByIdAdmin,
   listAllEntriesByUserId,
 } from '../models/entry-models.mjs';
+import {validationResult} from 'express-validator';
 
 // GET all entries - FOR USERS
-const getEntries = async (req, res) => {
+const getEntries = async (req, res, next) => {
   let result = '';
   if (req.user.user_level === 'admin') {
     console.log('Admin user accessing all entries');
@@ -21,25 +23,60 @@ const getEntries = async (req, res) => {
   if (!result.error) {
     res.json(result);
   } else {
-    res.status(500);
-    res.json(result);
+    const error = new Error(result.error);
+    error.status = 500;
+    return next(error);
   }
 };
 
 // GET specific entries - FOR ADMIN
-const getEntryById = async (req, res) => {
+const getEntryById = async (req, res, next) => {
   try {
     if (req.user.user_level === 'admin') {
       const result = await selectEntryById(req.params.id);
       return res.json(result);
     } else {
-      return res.status(401).send('Unauthorized');
+      // CASE: Unauthorized user
+      const error = new Error('Unauthorized');
+      error.status = 401;
+      return next(error);
     }
   } catch (error) {
-    return res.status(500).json({error: 'Internal server error'});
+    // CASE: Server error
+    const error2 = new Error(error);
+    error2.status = 500;
+    return next(error2);
   }
 };
 
+const postEntry = async (req, res, next) => {
+  const validationErrors = validationResult(req);
+  // check that all needed fields are included in request
+  if (validationErrors.isEmpty()) {
+    // Destruct properties from req.body to separate variables,
+    const {
+      entry_date: entryDate,
+      mood,
+      weight,
+      sleep_hours: sleepHours,
+      notes,
+    } = req.body;
+    if (entryDate && (weight || mood || sleepHours || notes)) {
+      const result = await addEntry(req.user, req.body, next);
+      if (result.entry_id) {
+        res.status(201);
+        res.json({message: 'New entry added.', ...result});
+      }
+    } else {
+      res.sendStatus(400);
+    }
+  } else {
+    const error = new Error('bad request');
+    error.status = 400;
+    error.errors = validationErrors.errors;
+    return next(error);
+  }
+};
 // PUT, update existing entry - FOR USER
 const putEntry = async (req, res) => {
   const userId = req.user.user_id;
@@ -77,4 +114,4 @@ const deleteEntry = async (req, res) => {
   return res.json(result);
 };
 
-export {getEntries, getEntryById, putEntry, deleteEntry};
+export {getEntries, getEntryById, putEntry, deleteEntry, postEntry};

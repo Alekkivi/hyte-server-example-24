@@ -32,7 +32,7 @@ const selectUserById = async (id) => {
 };
 
 // create new user in db
-const insertUser = async (user) => {
+const insertUser = async (user, next) => {
   try {
     const sql =
       'INSERT INTO Users (username, password, email) VALUES (?, ?, ?)';
@@ -41,12 +41,12 @@ const insertUser = async (user) => {
     return {message: 'new user created', user_id: result.insertId};
   } catch (error) {
     console.error('insertUser', error);
-    return {error: 409, message: 'User already exists'};
+    return next(new Error('Username taken'));
   }
 };
 
 // update user in db
-const updateUserById = async (user) => {
+const updateUserById = async (user, next) => {
   try {
     const sql =
       'UPDATE Users SET username=?, password=?, email=? WHERE user_id=?';
@@ -56,7 +56,7 @@ const updateUserById = async (user) => {
 
     // CASE: User id not found
     if (result.affectedRows === 0) {
-      return {error: 404, message: 'user not found'};
+      return next(new Error(error));
     } else {
       // CASE: Request ok
       return {message: 'user data updated', user_id: user.user_id};
@@ -64,10 +64,10 @@ const updateUserById = async (user) => {
   } catch (error) {
     // CASE: Duplicate username
     if (error.errno) {
-      return {error: 400, message: 'Username taken'};
+      return next(new Error('Username taken'));
     }
     console.error('updateUserById', error);
-    return {error: 500, message: 'db error'};
+    return next(new Error(error));
   }
 };
 

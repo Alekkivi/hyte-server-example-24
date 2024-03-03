@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import promisePool from '../utils/database.mjs';
 
 // Get all entries in db - FOR ADMIN
@@ -24,6 +25,37 @@ const listAllEntriesByUserId = async (id) => {
   } catch (e) {
     console.error('error', e.message);
     return {error: e.message};
+  }
+};
+
+const addEntry = async (user, entry, next) => {
+  const {entry_date, mood, weight, sleep_hours, notes} = entry;
+  // eslint-disable-next-line max-len
+  const sql = `INSERT INTO DiaryEntries (user_id, entry_date, mood, weight, sleep_hours, notes)
+  VALUES (?, ?, ?, ?, ?, ?)`;
+  const params = [user.user_id, entry_date, mood, weight, sleep_hours, notes];
+  try {
+    const rows = await promisePool.query(sql, params);
+    return {entry_id: rows[0].insertId};
+  } catch (e) {
+    console.error('error', e.message);
+    return next(new Error(e.message));
+  }
+};
+
+const postEntry = async (req, res) => {
+  const {user_id, entry_date, mood, weight, sleep_hours, notes} = req.body;
+  if (entry_date && (weight || mood || sleep_hours || notes) && user_id) {
+    const result = await addEntry(req.body);
+    if (result.entry_id) {
+      res.status(201);
+      res.json({message: 'New entry added.', ...result});
+    } else {
+      res.status(500);
+      res.json(result);
+    }
+  } else {
+    res.sendStatus(400);
   }
 };
 
@@ -106,10 +138,12 @@ const deleteEntryByIdAdmin = async (entryId) => {
 };
 
 export {
+  addEntry,
   listAllEntries,
   deleteEntryByIdAdmin,
   selectEntryById,
   updateEntryById,
+  postEntry,
   deleteEntryByIdUser,
   listAllEntriesByUserId,
 };

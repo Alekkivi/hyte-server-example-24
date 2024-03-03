@@ -12,7 +12,6 @@ import {
 // eslint-disable-next-line new-cap
 const itemRouter = express.Router();
 
-// Define routes here
 // List items - GET http://127.0.0.1:3000/items
 itemRouter.get('/', getItems);
 
