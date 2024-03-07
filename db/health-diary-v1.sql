@@ -4,7 +4,7 @@ CREATE DATABASE HealthDiary;
 USE HealthDiary;
 
 -- Create a table for users
-CREATE TABLE Users (
+CREATE TABLE users (
     user_id         INT AUTO_INCREMENT PRIMARY KEY,
     username        VARCHAR(50) NOT NULL UNIQUE UNIQUE,
     password_hash   VARCHAR(255) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE Users (
 );
 
 -- Create a table for diary entries
-CREATE TABLE DiaryEntries (
+CREATE TABLE diaryentries (
     entry_id        INT AUTO_INCREMENT PRIMARY KEY,
     user_id         INT NOT NULL,
     entry_date      DATE NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE DiaryEntries (
 );
 
 -- Create a table for MonthlyAverages
-CREATE TABLE MonthlyAverages (
+CREATE TABLE monthlyaverages (
     entry_id                INT AUTO_INCREMENT PRIMARY KEY,
     user_id                 INT NOT NULL,
     calculated_average      INT NOT NULL,
@@ -36,15 +36,15 @@ CREATE TABLE MonthlyAverages (
 
 ------------------- Insert mock data into the database -------------------------
 
-INSERT INTO Users (username, password_hash)
+INSERT INTO users (username, password_hash)
 VALUES ('Mikko', 'abcdefghijklmnoupgrstu');
 
-INSERT INTO DiaryEntries (user_id, entry_date, description, weight, sleep_hours, notes)
+INSERT INTO diaryentries (user_id, entry_date, description, weight, sleep_hours, notes)
 VALUES
 (1, '2024-02-02', 'good', 65.00, 7, 'felt good throughout the day'),
 (1, '2024-02-01', 'bad', 65.00, 3, 'felt bad throughout the day');
 
-INSERT INTO MonthlyAverages (user_id, calculated_average, month_number, year)
+INSERT INTO monthlyaverages (user_id, calculated_average, month_number, year)
 VALUES (1, 6.4, 2, 2024);
 
 ------------------------------ Use cases ----------------------------------------

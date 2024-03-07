@@ -70,6 +70,15 @@ Example request formatting:
 }
 The example request will update the diary entry with corresponding entry_date
 
+### Post a new entry (requeires token)
+{
+  "entry_date": "2024-02-12",
+  "mood": "Happy",
+  "weight": 69.6,
+  "sleep_hours": 7,
+  "notes": "This was a good day",
+}
+
 ### Delete a specific entry using entry_id (requires token)
 DELETE http://127.0.0.1:3000/api/entries/id
 Where id is the entry_id of a specific entry

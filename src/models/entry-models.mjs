@@ -4,12 +4,35 @@ import promisePool from '../utils/database.mjs';
 // Get all entries in db - FOR ADMIN
 const listAllEntries = async () => {
   try {
-    // if nothing is found, result array is empty []
     const sql = 'SELECT * FROM diaryentries';
     const [rows] = await promisePool.query(sql);
-    return rows;
+    if (rows.length === 0) {
+      // If there is no entries in db
+      return {error: 404, message: 'No entries found'};
+    } else {
+      // return all found entries
+      return rows;
+    }
   } catch (error) {
     console.error('listAllEntries', error);
+    return {error: 500, message: 'db error'};
+  }
+};
+
+// Get specific entry in db - FOR ADMIN
+const selectEntryById = async (id) => {
+  try {
+    const sql = 'SELECT * FROM diaryentries WHERE user_id=?';
+    const params = [id];
+    const [rows] = await promisePool.query(sql, params);
+    // if nothing is found with the user id, result array is empty []
+    if (rows.length === 0) {
+      return {error: 404, message: `no entries found with user_id = ${id} `};
+    }
+    // return all found entries
+    return rows;
+  } catch (error) {
+    console.error('selectUserById', error);
     return {error: 500, message: 'db error'};
   }
 };
@@ -20,15 +43,14 @@ const listAllEntriesByUserId = async (id) => {
     const sql = 'SELECT * FROM DiaryEntries WHERE user_id=?';
     const params = [id];
     const [rows] = await promisePool.query(sql, params);
-    // console.log('rows', rows);
     return rows;
-  } catch (e) {
-    console.error('error', e.message);
-    return {error: e.message};
+  } catch (error) {
+    console.error('listAllEntriesByUserId', error);
+    return {error: 500, message: 'db error'};
   }
 };
 
-const addEntry = async (user, entry, next) => {
+const addEntry = async (user, entry) => {
   const {entry_date, mood, weight, sleep_hours, notes} = entry;
   // eslint-disable-next-line max-len
   const sql = `INSERT INTO DiaryEntries (user_id, entry_date, mood, weight, sleep_hours, notes)
@@ -36,10 +58,10 @@ const addEntry = async (user, entry, next) => {
   const params = [user.user_id, entry_date, mood, weight, sleep_hours, notes];
   try {
     const rows = await promisePool.query(sql, params);
-    return {entry_id: rows[0].insertId};
-  } catch (e) {
-    console.error('error', e.message);
-    return next(new Error(e.message));
+    return rows;
+  } catch (error) {
+    console.log('addEntry', error);
+    return {error: 500, message: 'db error'};
   }
 };
 
@@ -59,22 +81,6 @@ const postEntry = async (req, res) => {
   }
 };
 
-// Get specific entry in db
-const selectEntryById = async (id) => {
-  try {
-    const sql = 'SELECT * FROM diaryentries WHERE user_id=?';
-    const params = [id];
-    const [rows] = await promisePool.query(sql, params);
-    // if nothing is found with the user id, result array is empty []
-    if (rows.length === 0) {
-      return {error: 404, message: 'user not found'};
-    }
-    return rows;
-  } catch (error) {
-    console.error('selectUserById', error);
-    return {error: 500, message: 'db error'};
-  }
-};
 
 // update entry in db
 const updateEntryById = async (user) => {
@@ -93,7 +99,7 @@ const updateEntryById = async (user) => {
     ];
     const [result] = await promisePool.query(sql, params);
     console.log(result);
-    return {message: 'user data updated', user_id: user.user_id};
+    return {message: 'user data updated', user_id: user.userId};
   } catch (error) {
     console.error('updateEntryById', error);
     return {error: 500, message: 'db error'};
@@ -101,12 +107,10 @@ const updateEntryById = async (user) => {
 };
 
 // delete entries in db
-const deleteEntryByIdUser = async (userId, entryId) => {
+const deleteEntryByIdUser = async (userId, entryDate) => {
   try {
-    console.log(userId);
-    console.log(entryId);
-    const sql = 'DELETE FROM diaryentries WHERE entry_id=? and user_id=?';
-    const params = [entryId, userId];
+    const sql = 'DELETE FROM diaryentries WHERE entry_date=? and user_id=?';
+    const params = [entryDate, userId];
     const [result] = await promisePool.query(sql, params);
     console.log(result);
     if (result.affectedRows === 0) {
@@ -114,25 +118,23 @@ const deleteEntryByIdUser = async (userId, entryId) => {
     }
     return {message: 'Entry deleted', user_id: userId};
   } catch (error) {
-    // note that users with other data (FK constraint) can't be deleted directly
     console.error('deleteEntryById', error);
     return {error: 500, message: 'db error'};
   }
 };
 
-const deleteEntryByIdAdmin = async (entryId) => {
+const deleteEntryByIdAdmin = async (entryDate) => {
   try {
-    const sql = 'DELETE FROM diaryentries WHERE entry_id=?';
-    const params = [entryId];
+    const sql = 'DELETE FROM diaryentries WHERE entry_date=?';
+    const params = [entryDate];
     const [result] = await promisePool.query(sql, params);
     console.log(result);
     if (result.affectedRows === 0) {
       return {error: 404, message: 'entry not found'};
     }
-    return {message: 'Entry deleted', entry_id: entryId};
+    return {message: 'Entry deleted'};
   } catch (error) {
-    // note that users with other data (FK constraint) cant be deleted directly
-    console.error('deleteEntryById', error);
+    console.error('deleteEntryByIdAdmin', error);
     return {error: 500, message: 'db error'};
   }
 };

@@ -4,35 +4,27 @@ import 'dotenv/config';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-
+// TODO VALIDATION
 // Check login credentials from request body
 const postLogin = async (req, res, next) => {
-  // Make sure that the request body meets expectations
-  const validationErrors = validationResult(req);
+  const {username, password} = req.body;
+  console.log('login', req.body);
+  const user = await selectUserByUsername(username);
 
-  if (validationErrors.isEmpty()) {
-    const {username, password} = req.body;
-    const user = await selectUserByUsername(username);
-    const match = await bcrypt.compare(password, user.password);
-
-    if (match) {
-      // Make sure we dont return password publically
-      delete user.password;
-      const token = jwt.sign(user, process.env.JWT_SECRET, {expiresIn: '24h'});
-      // CASE: Credentials from the request body match database credentials
-      return res.json({message: 'logged in successfully', user, token});
-    } else {
-      // CASE: Incorrect login credentials.
-      const error = new Error('invalid username or password');
-      error.status = 401;
-      error.errors = validationErrors.errors;
-      return next(error);
-    }
+  if (user.error) {
+    const error = new Error('Invalid username or password');
+    error.status = 401;
+    return next(error);
+  }
+  // compare password and hash, if match, login successful
+  const match = await bcrypt.compare(password, user.password);
+  if (match) {
+    delete user.password;
+    const token = jwt.sign(user, process.env.JWT_SECRET, {expiresIn: '24h'});
+    return res.json({message: 'logged in successfully', user, token});
   } else {
-    // CASE: Request body didnt pass validation
-    const error = new Error('bad request');
-    error.status = 400;
-    error.errors = validationErrors.errors;
+    const error = new Error('Invalid username or password');
+    error.status = 401;
     return next(error);
   }
 };

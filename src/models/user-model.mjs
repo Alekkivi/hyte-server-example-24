@@ -32,7 +32,7 @@ const selectUserById = async (id) => {
 };
 
 // create new user in db
-const insertUser = async (user, next) => {
+const insertUser = async (user) => {
   try {
     const sql =
       'INSERT INTO Users (username, password, email) VALUES (?, ?, ?)';
@@ -40,34 +40,32 @@ const insertUser = async (user, next) => {
     const [result] = await promisePool.query(sql, params);
     return {message: 'new user created', user_id: result.insertId};
   } catch (error) {
-    console.error('insertUser', error);
-    return next(new Error('Username taken'));
+    if (error.errno == 1062) {
+      return {error: 500, message: 'Username taken'};
+    } else {
+      console.error('insertUser', error);
+      return {error: 500, message: 'db error'};
+    }
   }
 };
 
 // update user in db
-const updateUserById = async (user, next) => {
+const updateUserById = async (user) => {
   try {
     const sql =
       'UPDATE Users SET username=?, password=?, email=? WHERE user_id=?';
     const params = [user.username, user.password, user.email, user.user_id];
     const [result] = await promisePool.query(sql, params);
     console.log(result);
-
-    // CASE: User id not found
+    // User id not found
     if (result.affectedRows === 0) {
-      return next(new Error(error));
+      return {error: 404, message: 'User id not found in the database.'};
     } else {
-      // CASE: Request ok
+      // Request ok
       return {message: 'user data updated', user_id: user.user_id};
     }
   } catch (error) {
-    // CASE: Duplicate username
-    if (error.errno) {
-      return next(new Error('Username taken'));
-    }
-    console.error('updateUserById', error);
-    return next(new Error(error));
+    return {error: 500, message: 'db error'};
   }
 };
 
@@ -79,15 +77,18 @@ const deleteUserById = async (id) => {
     const [result] = await promisePool.query(sql, params);
     console.log(result);
 
-    // CASE: User id not found
+    // User id not found
     if (result.affectedRows === 0) {
       return {error: 404, message: 'user not found'};
     }
     return {message: 'user deleted', user_id: id};
   } catch (error) {
     // note that users with other data (FK constraint) cant be deleted directly
-    console.error('deleteUserById', error);
-    return {error: 500, message: 'db error'};
+    if (error.errno === 1451) {
+      return {error: 500, message: 'FK constraint'};
+    } else {
+      return {error: 500, message: 'db error'};
+    }
   }
 };
 
@@ -107,8 +108,6 @@ const selectUserByUsername = async (username) => {
   }
 };
 
-
-// Export all the functions
 export {
   selectUserByUsername,
   listAllUsers,

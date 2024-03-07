@@ -9,67 +9,72 @@ import {
 } from '../models/user-model.mjs';
 /* eslint-disable camelcase */
 
-
-// GET all users
+// Get a list of all users
 const getUsers = async (req, res, next) => {
   // Check if token is linked to admin user_level
   if (req.user.user_level === 'admin') {
     const result = await listAllUsers();
+    // Check for error in db
     if (result.error) {
-      // CASE: db error
-      const error = new Error(result.error);
-      error.status = 500;
+      const error = new Error(result.message);
+      error.status = result.error;
       return next(error);
     }
-    // CASE: Request ok
+    // Request ok
     return res.json(result);
   } else {
-    // CASE: Unauthorized user
+    // Unauthorized user
     const error = new Error('Unauthorized');
     error.status = 401;
     return next(error);
   }
 };
 
-// GET specific user
+// Get specific user using request params
 const getUserById = async (req, res, next) => {
   // Admin can see every user by id
   if (req.user.user_level === 'admin') {
     const result = await selectUserById(req.params.id);
+    // Check for error in db
     if (result.error) {
-      // CASE: db error
-      const error = new Error(result.error);
-      error.status = 500;
+      const error = new Error(result.message);
+      error.status = result.error;
       return next(error);
     }
-    // CASE: Request ok
+    // Request ok
     return res.json(result);
   } else {
-    // CASE: Unauthorized user
+    // Unauthorized user
     const error = new Error('Unauthorized');
     error.status = 401;
     return next(error);
   }
 };
 
-// POST create a new user - FOR BOTH
+// Create a new user using request body
 const postUser = async (req, res, next) => {
   const {username, password, email} = req.body;
+  // Check for validation errors in request body
   const validationErrors = validationResult(req);
-  console.log('user validation errors', validationErrors);
-  // check that all needed fields are included in request
   if (validationErrors.isEmpty()) {
+    // Hash the password for storage
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const result = await insertUser(
-        {
-          username,
-          email,
-          password: hashedPassword,
-        },
-        next);
+    const result = await insertUser({
+      username,
+      email,
+      password: hashedPassword,
+    });
+    // Check for error in db
+    if (result.error) {
+      const error = new Error(result.message);
+      error.status = result.error;
+      return next(error);
+    }
+    // Request ok
     return res.status(201).json(result);
   } else {
+    // Request body didnt pass validation
     const error = new Error('bad request');
     error.status = 400;
     error.errors = validationErrors.errors;
@@ -86,18 +91,22 @@ const putUser = async (req, res, next) => {
     const {username, password, email} = req.body;
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const result = await updateUserById(
-        {
-          user_id,
-          username,
-          password: hashedPassword,
-          email,
-        },
-        next);
-    // CASE: User update successful
+    const result = await updateUserById({
+      user_id,
+      username,
+      password: hashedPassword,
+      email,
+    });
+    // Check for error in db
+    if (result.error) {
+      const error = new Error(result.message);
+      error.status = result.error;
+      return next(error);
+    }
+    // User update successful
     return res.status(201).json(result);
   } else {
-    // CASE: Validation error in request body
+    // Validation error in request body
     const error = new Error('bad request');
     error.status = 400;
     error.errors = validationErrors.errors;
@@ -105,38 +114,24 @@ const putUser = async (req, res, next) => {
   }
 };
 
-// DELETE user - FOR BOTH
+// Delete user using request params
 const deleteUser = async (req, res, next) => {
-  try {
-    if (req.user.user_level === 'admin' || req.user.user_id == req.params.id) {
-      const result = await deleteUserById(req.params.id);
-      if (result.error) {
-        // CASE: Deletion error
-        const error = new Error('Deletion failed.');
-        error.status = 401;
-        error.errors = result.error;
-        return next(error);
-      }
-      // CASE: User deleted successfully
-      return res.json(result);
-    } else {
-      // CASE: Unauthorized user
-      const error = new Error('Unauthorized');
-      error.status = 401;
+  if (req.user.user_level === 'admin') {
+    const result = await deleteUserById(req.params.id);
+    // Check for error in db
+    if (result.error) {
+      const error = new Error(result.message);
+      error.status = result.error;
       return next(error);
     }
-  } catch (error) {
-    // CASE: Server error
-    const error2 = new Error('Server error.');
-    error2.status = 500;
-    return next(error2);
+    // User deleted successfully
+    return res.json(result);
+  } else {
+    // Unauthorized user
+    const error = new Error('Unauthorized');
+    error.status = 401;
+    return next(error);
   }
 };
 
-export {
-  getUsers,
-  getUserById,
-  postUser,
-  putUser,
-  deleteUser,
-};
+export {getUsers, getUserById, postUser, putUser, deleteUser};

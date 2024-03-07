@@ -21,14 +21,21 @@ entryRouter.route('/').get(authenticateToken, getEntries)
         body('weight').isFloat(),
         body('sleep_hours').isFloat(),
         body('notes').isString(),
-        postEntry);
+        postEntry)
+    .put(authenticateToken,
+        body('entry_date').isDate(),
+        body('mood').isString(),
+        body('weight').isFloat(),
+        body('sleep_hours').isFloat(),
+        body('notes').isString(),
+        putEntry)
+    .delete(authenticateToken,
+        body('entry_date').isDate(),
+        deleteEntry);
 
 
 // /entries/:id endpoint
-entryRouter
-    .route('/:id')
-    .get(authenticateToken, getEntryById)
-    .put(authenticateToken, putEntry)
-    .delete(authenticateToken, deleteEntry);
+entryRouter.route('/:id').get(authenticateToken, getEntryById);
+
 
 export default entryRouter;

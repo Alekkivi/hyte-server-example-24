@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
-
 // Check for bearer token in the request
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -9,18 +8,23 @@ const authenticateToken = (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (token == null) {
-    // CASE: There was no token in the request
-    console.log('Token was null');
-    return res.sendStatus(401);
+    // There was no token in the request
+    const missingToken = new Error('Bearer token null');
+    missingToken.status = 401;
+    return next(missingToken);
   }
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
-    // CASE: There was a correct token
-    console.log('Token was correct');
+    // There was a correct token
+    console.log(
+        `Request passed token validation - user_level = ${req.user.user_level}`,
+    );
     next();
   } catch (err) {
-    // CASE: There was a invalid token
-    res.status(403).send({message: 'invalid token'});
+    // There was a invalid token
+    const invalidToken = new Error('invalid token');
+    invalidToken.status = 403;
+    return next(invalidToken);
   }
 };
 

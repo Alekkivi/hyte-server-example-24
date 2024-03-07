@@ -6,9 +6,8 @@ const notFoundHandler = (req, res, next) => {
   next(error); // forward error to error handler
 };
 // eslint-disable-next-line valid-jsdoc
-/**
- * Custom default middleware for handling errors
- */
+
+// Custom default middleware for handling errors
 const errorHandler = (err, req, res, next) => {
   res.status(err.status || 500);
   res.json({
