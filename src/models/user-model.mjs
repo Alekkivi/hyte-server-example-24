@@ -12,8 +12,7 @@ const listAllUsers = async () => {
       'COUNT(ma.entry_id) AS monthly_average_count ' +
       // Refer to users table as u
       'FROM Users u ' +
-      'LEFT JOIN diaryentries de ON u.user_id = de.user_id ' +
-      'LEFT JOIN monthlyaverages ma ON u.user_id = ma.user_id ' +
+      'LEFT JOIN DiaryEntries de ON u.user_id = de.user_id ' +
       'GROUP BY u.user_id, u.username, u.email, u.created_at, u.user_level';
     const [rows] = await promisePool.query(sql);
     return rows;

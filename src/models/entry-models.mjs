@@ -4,7 +4,7 @@ import promisePool from '../utils/database.mjs';
 // Get all entries in db - FOR ADMIN
 const listAllEntries = async () => {
   try {
-    const sql = 'SELECT * FROM diaryentries';
+    const sql = 'SELECT * FROM DiaryEntries';
     const [rows] = await promisePool.query(sql);
     if (rows.length === 0) {
       // If there is no entries in db
@@ -22,7 +22,7 @@ const listAllEntries = async () => {
 // Get specific entry in db - FOR ADMIN
 const selectEntryById = async (id) => {
   try {
-    const sql = 'SELECT * FROM diaryentries WHERE user_id=?';
+    const sql = 'SELECT * FROM DiaryEntries WHERE user_id=?';
     const params = [id];
     const [rows] = await promisePool.query(sql, params);
     // if nothing is found with the user id, result array is empty []
@@ -93,7 +93,7 @@ const updateEntryById = async (user) => {
   try {
     const sql =
       // eslint-disable-next-line max-len
-      'UPDATE diaryentries SET entry_date=?, mood_color=?, weight=?, sleep_hours=?, notes=? WHERE entry_id=?';
+      'UPDATE DiaryEntries SET entry_date=?, mood_color=?, weight=?, sleep_hours=?, notes=? WHERE entry_id=?';
     const params = [
       user.entry_date,
       user.mood_color,
@@ -102,7 +102,7 @@ const updateEntryById = async (user) => {
       user.notes,
       user.entry_id,
     ];
-    console.log('params', params)
+    console.log('params', params);
     const [result] = await promisePool.query(sql, params);
     console.log(result);
     // Make sure to return ok only if a row was affected
@@ -122,7 +122,7 @@ const updateEntryById = async (user) => {
 // delete entries in db using entry_date
 const deleteEntryByIdUser = async (userId, entryId) => {
   try {
-    const sql = 'DELETE FROM diaryentries WHERE entry_id=? and user_id=?';
+    const sql = 'DELETE FROM DiaryEntries WHERE entry_id=? and user_id=?';
     const params = [entryId, userId];
     const [result] = await promisePool.query(sql, params);
     console.log(result);
@@ -138,7 +138,7 @@ const deleteEntryByIdUser = async (userId, entryId) => {
 
 const deleteEntryByIdAdmin = async (entryDate) => {
   try {
-    const sql = 'DELETE FROM diaryentries WHERE entry_date=?';
+    const sql = 'DELETE FROM DiaryEntries WHERE entry_date=?';
     const params = [entryDate];
     const [result] = await promisePool.query(sql, params);
     console.log(result);

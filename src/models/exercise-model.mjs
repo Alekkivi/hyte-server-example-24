@@ -4,7 +4,7 @@ import promisePool from '../utils/database.mjs';
 
 const getAllExercisesWithUserId = async (id) => {
   try {
-    const sql = 'SELECT * FROM exercises WHERE user_id=?';
+    const sql = 'SELECT * FROM Exercises WHERE user_id=?';
     const params = [id];
     const [rows] = await promisePool.query(sql, params);
     return rows;
@@ -17,7 +17,7 @@ const getAllExercisesWithUserId = async (id) => {
 const addExercise = async (id, body) => {
   try {
     const sql =
-      `INSERT INTO exercises (user_id, activity, duration, intensity, entry_date) VALUES (?,?,?,?, ?)`;
+      `INSERT INTO Exercises (user_id, activity, duration, intensity, entry_date) VALUES (?,?,?,?, ?)`;
     const params = [id, body.activity, body.duration, body.intensity, body.entry_date];
     const [rows] = await promisePool.query(sql, params);
     return rows;
@@ -32,7 +32,7 @@ const updateExerciseById = async (user) => {
   try {
     const sql =
       // eslint-disable-next-line max-len
-      'UPDATE exercises SET entry_date=?, type=?, duration=? WHERE user_id=? AND entry_date=?';
+      'UPDATE Exercises SET entry_date=?, type=?, duration=? WHERE user_id=? AND entry_date=?';
     const params = [
       user.entry_date,
       user.type,
@@ -59,7 +59,7 @@ const updateExerciseById = async (user) => {
 // delete entries in db using entry_date
 const deleteExerciseByUser = async (exerciseId, userId) => {
   try {
-    const sql = 'DELETE FROM exercises WHERE exercise_id=? and user_id=?';
+    const sql = 'DELETE FROM Exercises WHERE exercise_id=? and user_id=?';
     const params = [exerciseId, userId];
     const [result] = await promisePool.query(sql, params);
     console.log(result);
@@ -75,7 +75,7 @@ const deleteExerciseByUser = async (exerciseId, userId) => {
 
 const deleteAllExercises = async (id) => {
   try {
-    const sql = 'DELETE FROM exercises WHERE user_id=?';
+    const sql = 'DELETE FROM Exercises WHERE user_id=?';
     const params = [id];
     const [rows] = await promisePool.query(sql, params);
     return rows;
