@@ -1,22 +1,44 @@
+import {validationResult} from 'express-validator';
+
+
 /* eslint-disable linebreak-style */
+const customError = (message, status, errors) => {
+  const error = new Error(message);
+  error.status = status || 500;
+  if (errors) {
+    error.errors = errors;
+  }
+  return error;
+};
 
 const notFoundHandler = (req, res, next) => {
-  const error = new Error(`Not Found - ${req.originalUrl}`);
-  error.status = 404;
-  next(error); // forward error to error handler
+  const error = customError(`Not Found - ${req.originalUrl}`, 404);
+  next(error);
 };
-// eslint-disable-next-line valid-jsdoc
 
-// Custom default middleware for handling errors
 const errorHandler = (err, req, res, next) => {
   res.status(err.status || 500);
+  console.log('errorHandler', err.message, err.status, err.errors);
   res.json({
     error: {
       message: err.message,
       status: err.status || 500,
-      errors: err.errors || '',
+      errors: err.errors,
     },
   });
 };
 
-export {notFoundHandler, errorHandler};
+const validationErrorHandler = (req, res, next) => {
+  const errors = validationResult(req, {strictParams: ['body']});
+  if (!errors.isEmpty()) {
+    console.log('validation errors', errors.array({onlyFirstError: true}));
+    const error = customError('Bad Request', 400);
+    error.errors = errors.array({onlyFirstError: true}).map((error) => {
+      return {field: error.path, message: error.msg};
+    });
+    return next(error);
+  }
+  next();
+};
+
+export {customError, notFoundHandler, errorHandler, validationErrorHandler};

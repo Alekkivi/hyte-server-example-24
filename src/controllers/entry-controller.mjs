@@ -8,97 +8,74 @@ import {
   deleteEntryByIdAdmin,
   listAllEntriesByUserId,
 } from '../models/entry-models.mjs';
-import {validationResult} from 'express-validator';
+import {customError} from '../middlewares/error-handler.mjs';
+
 
 // Get all entries
 const getEntries = async (req, res, next) => {
   let result = '';
-  // Every entry in db can be accessed with admin token
+  // Check what token is included in the request
   if (req.user.user_level === 'admin') {
+    // Request contained admin token
     console.log('Admin user accessing all entries');
     result = await listAllEntries();
   } else {
-    // Regular token only returns user specific entries
+    // Request contained regular token
     console.log('Regular user accessing all available entries');
     result = await listAllEntriesByUserId(req.user.user_id);
   }
+  // Check if result is error-free
   if (!result.error) {
+    // Send response containing entries
     res.json(result);
   } else {
-    const error = new Error(result.message);
-    error.status = result.error;
-    return next(error);
+    // Forward to errorhandler, if result contains a error
+    next(new Error(result.error));
   }
 };
 
-// Get specific entries - FOR ADMIN
+// Get specific entries - only for admin
 const getEntryById = async (req, res, next) => {
-  // Make sure that the request contains admin token
+  // Check if token is linked to a admin user
   if (req.user.user_level === 'admin') {
     const result = await selectEntryById(req.params.id);
     if (result.error) {
-      // There was a error
-      const error = new Error(result.message);
-      error.status = result.error;
-      return next(error);
+      // Forward to errorhandler if result contains a error
+      next(customError('Entry not found', 404));
     } else {
-      // return found entries
+      // Send response containing entires, if there are no errors
       return res.json(result);
     }
   } else {
-    // Unauthorized user
-    const error = new Error('Unauthorized');
-    error.status = 401;
-    return next(error);
+    // Unauthorized user was trying to reach this function
+    next(customError('Unauthorized', 401));
   }
 };
 
-// Create a new entry to the db
+// Hande POST request for new diary entry
 const postEntry = async (req, res, next) => {
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty()) {
-    // Request didnt pass validation
-    const error = new Error('Bad request');
-    error.status = 400;
-    error.errors = validationErrors.errors;
-    return next(error);
-  }
-  // Try to fetch data from model
+  // Insert a new entry in the model
   const result = await addEntry(req.user, req.body);
   if (result.error) {
-    const error = new Error(result.message);
-    error.status = result.error;
-    return next(error);
+    // Forward to errorhandler if result contains a error
+    next(customError(result.message, result.error));
   } else {
-    // Result was ok
+    // Respond with OK-status, if there was no errors
     res
         .status(201)
         .json({message: 'Entry added', entry_id: result[0].insertId});
   }
 };
 
-// Update existing entry based on entry date
+// Update existing diary entry using entry_id from request
 const putEntry = async (req, res, next) => {
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty()) {
-    // Request didnt pass validation
-    const error = new Error('Bad request');
-    error.status = 400;
-    error.errors = validationErrors.errors;
-    return next(error);
-  }
-  // Request passed the validation
   const userId = req.user.user_id;
-  console.log(req.body)
-
   const result = await updateEntryById({userId, ...req.body});
   if (result.error) {
-    // There was a error
-    const error = new Error(result.message);
-    error.status = result.error;
-    return next(error);
+    // Forward to errorhandler if result contains a error
+    next(new Error(result.message, result.error));
   } else {
-    // Request ok
+    // Respond with OK-status, if there was no errors
     return res.status(201).json(result);
   }
 };
@@ -106,29 +83,21 @@ const putEntry = async (req, res, next) => {
 // Delete entry
 const deleteEntry = async (req, res, next) => {
   let result = '';
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty()) {
-    // Request didnt pass validation
-    const error = new Error('Bad requsjadfhasdhfest');
-    error.status = 400;
-    error.errors = validationErrors.errors;
-    return next(error);
-  }
-
+  // Check what token is included in the request
   if (req.user.user_level === 'admin') {
-    console.log('admin deleting entry');
-    result = await deleteEntryByIdAdmin(req.body.entry_date);
+    // Request contained admin token
+    console.log('admin-user accessing deleteEntry function');
+    result = await deleteEntryByIdAdmin(req.body.entry_id);
   } else {
-    console.log('User deleting entry');
+    // Request contained regular token
+    console.log('regular-user accessing deleteEntry function');
     result = await deleteEntryByIdUser(req.user.user_id, req.body.entry_id);
   }
   if (result.error) {
-    // There was a error
-    const error = new Error(result.message);
-    error.status = result.error;
-    return next(error);
+    // Forward to errorhandler, if result contains a error
+    next(new Error(result.message, result.error));
   } else {
-    // Request ok
+    // Respond with OK-status, if there was no errors
     return res.json(result);
   }
 };

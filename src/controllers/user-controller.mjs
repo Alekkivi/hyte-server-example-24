@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import {validationResult} from 'express-validator';
+import {customError} from '../middlewares/error-handler.mjs';
 import {
   deleteUserById,
   insertUser,
@@ -9,128 +9,104 @@ import {
 } from '../models/user-model.mjs';
 /* eslint-disable camelcase */
 
-// Get a list of all users
+// Get a list of all users - For admin
 const getUsers = async (req, res, next) => {
-  // Check if token is linked to admin user_level
+  // Check if token is linked to admin user
   if (req.user.user_level === 'admin') {
     const result = await listAllUsers();
-    // Check for error in db
+    // Check for error in result
     if (result.error) {
-      const error = new Error(result.message);
-      error.status = result.error;
-      return next(error);
+      // Forward to errorhandler if result contains a error
+      next(customError(result.message, result.error));
+    } else {
+      // Send response containing users, if there are no errors
+      return res.json(result);
     }
-    // Request ok
-    return res.json(result);
   } else {
-    // Unauthorized user
-    const error = new Error('Unauthorized');
-    error.status = 401;
-    return next(error);
+    // Unauthorized user was trying to reach this function
+    next(customError('Unauthorized', 401));
   }
 };
 
-// Get specific user using request params
+// Get specific user using request parameters
 const getUserById = async (req, res, next) => {
-  // Admin can see every user by id
+  // Check if token is linked to admin user
   if (req.user.user_level === 'admin') {
     const result = await selectUserById(req.params.id);
-    // Check for error in db
+    // Check for error in result
     if (result.error) {
-      const error = new Error(result.message);
-      error.status = result.error;
-      return next(error);
+      // Forward to errorhandler if result contains a error
+      next(customError(result.message, result.error));
+    } else {
+      // Send response containing user, if there are no errors
+      return res.json(result);
     }
-    // Request ok
-    return res.json(result);
   } else {
-    // Unauthorized user
-    const error = new Error('Unauthorized');
-    error.status = 401;
-    return next(error);
+    // Unauthorized user was trying to reach this function
+    next(customError('Unauthorized', 401));
   }
 };
 
-// Create a new user using request body
+// Create a new user
 const postUser = async (req, res, next) => {
   const {username, password, email} = req.body;
-  // Check for validation errors in request body
-  const validationErrors = validationResult(req);
-  if (validationErrors.isEmpty()) {
-    // Hash the password for storage
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const result = await insertUser({
-      username,
-      email,
-      password: hashedPassword,
-    });
-    // Check for error in db
-    if (result.error) {
-      const error = new Error(result.message);
-      error.status = result.error;
-      return next(error);
-    }
-    // Request ok
-    return res.status(201).json(result);
+  // Generate salt to hash password
+  const salt = await bcrypt.genSalt(10);
+  // Apply salt and hash
+  const hashedPassword = await bcrypt.hash(password, salt);
+  const result = await insertUser({
+    username,
+    email,
+    password: hashedPassword,
+  });
+  // Check for error in result
+  if (result.error) {
+    // Forward to errorhandler if result contains a error
+    next(customError(result.message, result.error));
   } else {
-    // Request body didnt pass validation
-    const error = new Error('bad request');
-    error.status = 400;
-    error.errors = validationErrors.errors;
-    return next(error);
+    // Respond with a ok status - User created successfully
+    return res.status(201).json(result);
   }
 };
 
-// PUT, update existing user - FOR BOTH
+// Update existing user
 const putUser = async (req, res, next) => {
-  const validationErrors = validationResult(req);
-  // check that all needed fields are included in request
-  if (validationErrors.isEmpty()) {
-    const user_id = req.user.user_id;
-    const {username, password, email} = req.body;
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    const result = await updateUserById({
-      user_id,
-      username,
-      password: hashedPassword,
-      email,
-    });
-    // Check for error in db
-    if (result.error) {
-      const error = new Error(result.message);
-      error.status = result.error;
-      return next(error);
-    }
-    // User update successful
-    return res.status(201).json(result);
+  const user_id = req.user.user_id;
+  const {username, password, email} = req.body;
+  // Generate salt to hash new password
+  const salt = await bcrypt.genSalt(10);
+  // Apply salt and hash
+  const hashedPassword = await bcrypt.hash(password, salt);
+  const result = await updateUserById({
+    user_id,
+    username,
+    password: hashedPassword,
+    email,
+  });
+  // Check for error in result
+  if (result.error) {
+    next(customError(result.message, result.error));
   } else {
-    // Validation error in request body
-    const error = new Error('bad request');
-    error.status = 400;
-    error.errors = validationErrors.errors;
-    return next(error);
+    // Respond with a ok status - User update successful
+    return res.status(201).json(result);
   }
 };
 
 // Delete user using request params
 const deleteUser = async (req, res, next) => {
+  // Check if token is linked to admin user
   if (req.user.user_level === 'admin') {
     const result = await deleteUserById(req.params.id);
     // Check for error in db
     if (result.error) {
-      const error = new Error(result.message);
-      error.status = result.error;
-      return next(error);
+      next(customError(result.message, result.error));
+    } else {
+      // Respond with a ok status - User deleted successfully
+      return res.json(result);
     }
-    // User deleted successfully
-    return res.json(result);
   } else {
-    // Unauthorized user
-    const error = new Error('Unauthorized');
-    error.status = 401;
-    return next(error);
+    // Unauthorized user was trying to reach this function
+    next(customError('Unauthorized', 401));
   }
 };
 

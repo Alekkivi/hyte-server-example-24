@@ -1,117 +1,78 @@
-/* eslint-disable linebreak-style */
-import {validationResult} from 'express-validator';
 import {
   getAllExercisesWithUserId,
   addExercise,
-  updateExerciseById,
   deleteExerciseByUser,
   deleteAllExercises,
 } from '../models/exercise-model.mjs';
+import {customError} from '../middlewares/error-handler.mjs';
 
+// Get all exercises - For regular users
 const getAllExercises = async (req, res, next) => {
-  console.log('User accessing all available exercises');
   const result = await getAllExercisesWithUserId(req.user.user_id);
+  // Check if the result contains a error
   if (!result.error) {
+    // Return found entries, if no errors occured
     return res.json(result);
+  } else {
+    // There was a error
+    next(customError(result.message, result.error));
   }
-  const test = new Error('asdfasdfasdf');
-  test.status = 404;
-  return next(test);
 };
 
+// Add a new exercise entry
 const PostExercise = async (req, res, next) => {
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty) {
-    const test = new Error('asdfasdfasdf');
-    test.status = 404;
-    return next(test);
-  }
   const result = await addExercise(req.user.user_id, req.body);
+  // Check if the result contains a error
   if (!result.error) {
-    console.log(result);
-    // eslint-disable-next-line max-len
+    // Return OK-status, if no error occurred
     res
         .status(201)
         .json({message: 'Exercise added', entry_id: result.insertId});
   } else {
-    const test = new Error('asdfasdfasdf');
-    test.status = 404;
-    return next(test);
-  }
-};
-
-const putExercise = async (req, res, next) => {
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty()) {
-    // Request didnt pass validation
-    const error = new Error('Bad request');
-    error.status = 400;
-    error.errors = validationErrors.errors;
-    return next(error);
-  }
-  // Request passed the validation
-  const userId = req.user.user_id;
-  const result = await updateExerciseById({userId, ...req.body});
-  if (result.error) {
     // There was a error
-    const error = new Error(result.message);
-    error.status = result.error;
-    return next(error);
-  } else {
-    // Request ok
-    return res.status(201).json(result);
+    next(customError(result.message, result.error));
   }
 };
 
-// Delete exercise
+// Delete exercises using exercise_id - For regular users
 const deleteExercise = async (req, res, next) => {
-  let result = '';
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty()) {
-    // Request didnt pass validation
-    const error = new Error('Bad requsjadfhasdhfest');
-    error.status = 400;
-    error.errors = validationErrors.errors;
-    return next(error);
-  }
-  console.log('User deleting exercises');
-  console.log(req.body)
-  result = await deleteExerciseByUser(req.body.exercise_id, req.user.user_id);
-  if (result.error) {
-    // There was a error
-    const error = new Error(result.message);
-    error.status = result.error;
-    return next(error);
+  // Check if admin user is trying to access this function
+  if (req.user.user_level === 'admin') {
+    // Notify the admin, that this is not for them
+    next(customError('This service is only for regular users', 401));
   } else {
-    // Request ok
-    return res.json(result);
+    // The request was linked to regular token so proceed to query
+    const result = await deleteExerciseByUser(
+        req.body.exercise_id,
+        req.user.user_id);
+    // Check if there is a error in the result
+    if (result.error) {
+      // There was a error
+      next(customError(result.message, result.error));
+    } else {
+      // Return OK-status, if no error occurred
+      return res.json(result);
+    }
   }
 };
 
+// Delete all exercises using user_id - For admin
 const deleteAll = async (req, res, next) => {
   // Make sure that the request contains admin token
   if (req.user.user_level === 'admin') {
     const result = await deleteAllExercises(req.params.id);
+    // Check if there is a error in the result
     if (result.error) {
       // There was a error
-      const error = new Error(result.message);
-      error.status = result.error;
-      return next(error);
+      next(customError(result.message, result.error));
     } else {
-      // return found entries
+      // Return OK-status, if no error occurred
       return res.json(result);
     }
   } else {
-    // Unauthorized user
-    const error = new Error('Unauthorized');
-    error.status = 401;
-    return next(error);
+    // Unauthorized user trying to access the function
+    next(customError('Unauthorized', 401));
   }
 };
-export {
-  getAllExercises,
-  PostExercise,
-  putExercise,
-  deleteExercise,
-  deleteAll,
-};
+
+export {getAllExercises, PostExercise, deleteExercise, deleteAll};

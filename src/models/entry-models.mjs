@@ -138,7 +138,7 @@ const deleteEntryByIdUser = async (userId, entryId) => {
 
 const deleteEntryByIdAdmin = async (entryDate) => {
   try {
-    const sql = 'DELETE FROM DiaryEntries WHERE entry_date=?';
+    const sql = 'DELETE FROM DiaryEntries WHERE entry_id=?';
     const params = [entryDate];
     const [result] = await promisePool.query(sql, params);
     console.log(result);

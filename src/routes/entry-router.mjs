@@ -8,6 +8,7 @@ import {
   deleteEntry,
 } from '../controllers/entry-controller.mjs';
 import {authenticateToken} from '../middlewares/authentication.mjs';
+import {validationErrorHandler} from '../middlewares/error-handler.mjs';
 
 // eslint-disable-next-line new-cap
 const entryRouter = express.Router();
@@ -19,8 +20,9 @@ entryRouter.route('/').get(authenticateToken, getEntries)
         body('entry_date').isDate(),
         body('mood_color').isString(),
         body('weight').isFloat(),
-        body('sleep_hours').isFloat(),
+        body('sleep_hours').isInt({min: 0, max: 24}),
         body('notes').isString(),
+        validationErrorHandler,
         postEntry)
     .put(authenticateToken,
         body('entry_id').isInt(),
@@ -29,8 +31,11 @@ entryRouter.route('/').get(authenticateToken, getEntries)
         body('weight').isFloat(),
         body('sleep_hours').isFloat(),
         body('notes').isString(),
+        validationErrorHandler,
         putEntry)
     .delete(authenticateToken,
+        body('entry_id').isInt(),
+        validationErrorHandler,
         deleteEntry);
 
 

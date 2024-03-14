@@ -1,24 +1,37 @@
 import promisePool from '../utils/database.mjs';
 
-// Get all users in db
+// Get all users in database - For admin
 const listAllUsers = async () => {
   try {
-    const sql =
-      // Select from user table these values
-      'SELECT u.user_id, u.username, u.email, u.created_at, u.user_level, ' +
-      // How many entries in diaryentries table
-      'COUNT(de.entry_id) AS diary_entry_count, ' +
-      // How many entries in monthlyaverages table
-      'COUNT(ma.entry_id) AS monthly_average_count ' +
-      // Refer to users table as u
-      'FROM Users u ' +
-      'LEFT JOIN DiaryEntries de ON u.user_id = de.user_id ' +
-      'GROUP BY u.user_id, u.username, u.email, u.created_at, u.user_level';
+    // Get user data, exercise count and diary entry count.
+    const sql = `
+        SELECT
+        u.user_id,
+        u.username,
+        u.email,
+        u.created_at,
+        u.user_level,
+        COUNT(DISTINCT de.entry_id) AS diary_entry_count,
+        COUNT(DISTINCT ex.exercise_id) AS exercise_count
+    FROM
+        Users u
+    LEFT JOIN
+        DiaryEntries de ON u.user_id = de.user_id
+    LEFT JOIN
+        Exercises ex ON u.user_id = ex.user_id
+    GROUP BY
+        u.user_id,
+        u.username,
+        u.email,
+        u.created_at,
+        u.user_level;
+    `;
+    // Returns a empty list if no users found
     const [rows] = await promisePool.query(sql);
     return rows;
   } catch (error) {
     console.error('listAllUsers', error);
-    return {error: 500, message: 'db error'};
+    return {error: 500, message: error};
   }
 };
 // Get specific user in db
@@ -49,10 +62,10 @@ const insertUser = async (user) => {
     const [result] = await promisePool.query(sql, params);
     return {message: 'new user created', user_id: result.insertId};
   } catch (error) {
+    console.error('insertUser', error);
     if (error.errno == 1062) {
-      return {error: 500, message: 'Username taken'};
+      return {error: 409, message: 'Username taken or email'};
     } else {
-      console.error('insertUser', error);
       return {error: 500, message: 'db error'};
     }
   }
@@ -66,15 +79,24 @@ const updateUserById = async (user) => {
     const params = [user.username, user.password, user.email, user.user_id];
     const [result] = await promisePool.query(sql, params);
     console.log(result);
-    // User id not found
+    // Check were any rows affected
     if (result.affectedRows === 0) {
+      // 0 Affected rows mean that matching user_id was not found
       return {error: 404, message: 'User id not found in the database.'};
     } else {
       // Request ok
       return {message: 'user data updated', user_id: user.user_id};
     }
   } catch (error) {
-    return {error: 500, message: 'db error'};
+    console.log('updateUserById', error);
+    // Lack of username/email uniqueness will raise a error
+    if (error.errno === 1062) {
+      // If username/email was not unique, return conflict response
+      return {error: 409, message: 'Username or email taken'};
+    } else {
+      // Return generic database error
+      return {error: 500, message: 'db error'};
+    }
   }
 };
 
