@@ -13,7 +13,7 @@ exerciseRouter.route('/').get(authenticateToken, getAllExercises)
     .post(authenticateToken,
         body('entry_date').isDate(),
         body('duration').isInt(),
-        body('type').isString(),
+        body('activity').isString(),
         PostExercise)
     .put(authenticateToken,
         body('entry_date').isDate(),

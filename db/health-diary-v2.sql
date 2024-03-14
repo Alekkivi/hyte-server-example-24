@@ -4,7 +4,7 @@ CREATE DATABASE HealthDiary;
 
 USE HealthDiary;
 
-CREATE TABLE users (
+CREATE TABLE Users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE users (
     user_level VARCHAR(10) DEFAULT 'regular'
 );
 
-CREATE TABLE diaryentries (
+CREATE TABLE DiaryEntries (
     entry_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     entry_date DATE NOT NULL,
@@ -25,22 +25,12 @@ CREATE TABLE diaryentries (
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
 
-CREATE TABLE monthlyaverages (
-    entry_id                INT AUTO_INCREMENT PRIMARY KEY,
-    user_id                 INT NOT NULL,
-    calculated_average      INT NOT NULL,
-    month_number            INT NOT NULL,
-    year                    INT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
-CREATE TABLE exercises (
+CREATE TABLE Exercises (
     exercise_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     activity VARCHAR(100) NOT NULL,
     intensity VARCHAR(100) NOT NULL,
     duration INT NOT NULL,
     entry_date DATE,
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
+    FOREIGN KEY (user_id) REFERENCES Users(user_id)
 );
-{activity: 'Hiihto', duration: '20', intensity: 'Easy', user_id: '79', entry_date: '2024-03-12'}
