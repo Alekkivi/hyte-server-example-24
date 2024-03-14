@@ -17,20 +17,20 @@ const entryRouter = express.Router();
 entryRouter.route('/').get(authenticateToken, getEntries)
     .post(authenticateToken,
         body('entry_date').isDate(),
-        body('mood').isString(),
+        body('mood_color').isString(),
         body('weight').isFloat(),
         body('sleep_hours').isFloat(),
         body('notes').isString(),
         postEntry)
     .put(authenticateToken,
+        body('entry_id').isInt(),
         body('entry_date').isDate(),
-        body('mood').isString(),
+        body('mood_color').isString(),
         body('weight').isFloat(),
         body('sleep_hours').isFloat(),
         body('notes').isString(),
         putEntry)
     .delete(authenticateToken,
-        body('entry_date').isDate(),
         deleteEntry);
 
 

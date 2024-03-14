@@ -6,6 +6,7 @@ import cors from 'cors';
 import itemRouter from './routes/item-router.mjs';
 import userRouter from './routes/user-router.mjs';
 import entryRouter from './routes/entry-router.mjs';
+import exerciseRouter from './routes/exercise-router.mjs';
 import logger from './middlewares/logger.mjs';
 import authRouter from './routes/auth-router.mjs';
 import {errorHandler, notFoundHandler} from './middlewares/error-handler.mjs';
@@ -30,12 +31,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Tarjoiltava kansio määritellään ns. Relatiivisella polulla
-app.use('/sivusto', express.static(path.join(__dirname, '../public')));
+app.use('/docs', express.static(path.join(__dirname, '../docs')));
 
 app.use('/items', itemRouter);
 app.use('/api/users', userRouter);
 app.use('/api/entries', entryRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/exercises', exerciseRouter);
 
 // 404 not found middleware
 app.use(notFoundHandler);

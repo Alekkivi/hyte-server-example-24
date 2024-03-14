@@ -3,7 +3,18 @@ import promisePool from '../utils/database.mjs';
 // Get all users in db
 const listAllUsers = async () => {
   try {
-    const sql = 'SELECT user_id, username, user_level FROM Users';
+    const sql =
+      // Select from user table these values
+      'SELECT u.user_id, u.username, u.email, u.created_at, u.user_level, ' +
+      // How many entries in diaryentries table
+      'COUNT(de.entry_id) AS diary_entry_count, ' +
+      // How many entries in monthlyaverages table
+      'COUNT(ma.entry_id) AS monthly_average_count ' +
+      // Refer to users table as u
+      'FROM Users u ' +
+      'LEFT JOIN diaryentries de ON u.user_id = de.user_id ' +
+      'LEFT JOIN monthlyaverages ma ON u.user_id = ma.user_id ' +
+      'GROUP BY u.user_id, u.username, u.email, u.created_at, u.user_level';
     const [rows] = await promisePool.query(sql);
     return rows;
   } catch (error) {
@@ -11,7 +22,6 @@ const listAllUsers = async () => {
     return {error: 500, message: 'db error'};
   }
 };
-
 // Get specific user in db
 const selectUserById = async (id) => {
   try {

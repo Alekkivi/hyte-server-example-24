@@ -27,7 +27,7 @@ const selectEntryById = async (id) => {
     const [rows] = await promisePool.query(sql, params);
     // if nothing is found with the user id, result array is empty []
     if (rows.length === 0) {
-      return {error: 404, message: `no entries found with user_id = ${id} `};
+      return {error: 404, message: `No entries found with user_id = ${id} `};
     }
     // return all found entries
     return rows;
@@ -51,11 +51,18 @@ const listAllEntriesByUserId = async (id) => {
 };
 
 const addEntry = async (user, entry) => {
-  const {entry_date, mood, weight, sleep_hours, notes} = entry;
+  const {entry_date, mood_color, weight, sleep_hours, notes} = entry;
   // eslint-disable-next-line max-len
-  const sql = `INSERT INTO DiaryEntries (user_id, entry_date, mood, weight, sleep_hours, notes)
+  const sql = `INSERT INTO DiaryEntries (user_id, entry_date, mood_color, weight, sleep_hours, notes)
   VALUES (?, ?, ?, ?, ?, ?)`;
-  const params = [user.user_id, entry_date, mood, weight, sleep_hours, notes];
+  const params = [
+    user.user_id,
+    entry_date,
+    mood_color,
+    weight,
+    sleep_hours,
+    notes,
+  ];
   try {
     const rows = await promisePool.query(sql, params);
     return rows;
@@ -81,36 +88,42 @@ const postEntry = async (req, res) => {
   }
 };
 
-
-// update entry in db
+// update entry in db usint entry_date
 const updateEntryById = async (user) => {
   try {
     const sql =
       // eslint-disable-next-line max-len
-      'UPDATE diaryentries SET entry_date=?, mood=?, weight=?, sleep_hours=?, notes=? WHERE user_id=? AND entry_date=?';
+      'UPDATE diaryentries SET entry_date=?, mood_color=?, weight=?, sleep_hours=?, notes=? WHERE entry_id=?';
     const params = [
       user.entry_date,
-      user.mood,
+      user.mood_color,
       user.weight,
       user.sleep_hours,
       user.notes,
-      user.userId,
-      user.entry_date,
+      user.entry_id,
     ];
+    console.log('params', params)
     const [result] = await promisePool.query(sql, params);
     console.log(result);
-    return {message: 'user data updated', user_id: user.userId};
+    // Make sure to return ok only if a row was affected
+    if (result.affectedRows) {
+      return {message: 'Entry updated', user_id: user.userId};
+    } else {
+      // Entry was not found and/or affected
+      return {error: 404, message: 'Entry not found'};
+    }
   } catch (error) {
+    // Catch possible database errors
     console.error('updateEntryById', error);
     return {error: 500, message: 'db error'};
   }
 };
 
-// delete entries in db
-const deleteEntryByIdUser = async (userId, entryDate) => {
+// delete entries in db using entry_date
+const deleteEntryByIdUser = async (userId, entryId) => {
   try {
-    const sql = 'DELETE FROM diaryentries WHERE entry_date=? and user_id=?';
-    const params = [entryDate, userId];
+    const sql = 'DELETE FROM diaryentries WHERE entry_id=? and user_id=?';
+    const params = [entryId, userId];
     const [result] = await promisePool.query(sql, params);
     console.log(result);
     if (result.affectedRows === 0) {
@@ -138,6 +151,7 @@ const deleteEntryByIdAdmin = async (entryDate) => {
     return {error: 500, message: 'db error'};
   }
 };
+
 
 export {
   addEntry,

@@ -89,6 +89,8 @@ const putEntry = async (req, res, next) => {
   }
   // Request passed the validation
   const userId = req.user.user_id;
+  console.log(req.body)
+
   const result = await updateEntryById({userId, ...req.body});
   if (result.error) {
     // There was a error
@@ -107,7 +109,7 @@ const deleteEntry = async (req, res, next) => {
   const validationErrors = validationResult(req);
   if (!validationErrors.isEmpty()) {
     // Request didnt pass validation
-    const error = new Error('Bad request');
+    const error = new Error('Bad requsjadfhasdhfest');
     error.status = 400;
     error.errors = validationErrors.errors;
     return next(error);
@@ -118,7 +120,7 @@ const deleteEntry = async (req, res, next) => {
     result = await deleteEntryByIdAdmin(req.body.entry_date);
   } else {
     console.log('User deleting entry');
-    result = await deleteEntryByIdUser(req.user.user_id, req.body.entry_date);
+    result = await deleteEntryByIdUser(req.user.user_id, req.body.entry_id);
   }
   if (result.error) {
     // There was a error
@@ -131,4 +133,10 @@ const deleteEntry = async (req, res, next) => {
   }
 };
 
-export {getEntries, getEntryById, putEntry, deleteEntry, postEntry};
+export {
+  getEntries,
+  getEntryById,
+  putEntry,
+  deleteEntry,
+  postEntry,
+};
