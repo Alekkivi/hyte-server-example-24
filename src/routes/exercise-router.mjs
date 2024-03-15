@@ -26,7 +26,7 @@ exerciseRouter
         validationErrorHandler,
         PostExercise)
     .delete(authenticateToken,
-        body('entry_id').isInt(),
+        body('exercise_id').isInt(),
         validationErrorHandler,
         deleteExercise);
 
