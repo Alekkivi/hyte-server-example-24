@@ -13,10 +13,11 @@ import {errorHandler, notFoundHandler} from './middlewares/error-handler.mjs';
 
 
 // Define the host
-const hostname = '127.0.0.1';
+const hostname = 'https://hyte-server-aleksi.northeurope.cloudapp.azure.com';
 const port = 3000;
 const app = express();
 
+// Middlwares
 app.use(cors());
 app.use(logger);
 app.use(express.json());
