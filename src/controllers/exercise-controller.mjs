@@ -2,7 +2,7 @@ import {
   getAllExercisesWithUserId,
   addExercise,
   deleteExerciseByUser,
-  deleteAllExercises,
+  deleteAllExercisesAdmin,
 } from '../models/exercise-model.mjs';
 import {customError} from '../middlewares/error-handler.mjs';
 
@@ -57,10 +57,10 @@ const deleteExercise = async (req, res, next) => {
 };
 
 // Delete all exercises using user_id - For admin
-const deleteAll = async (req, res, next) => {
+const deleteAllExercises = async (req, res, next) => {
   // Make sure that the request contains admin token
   if (req.user.user_level === 'admin') {
-    const result = await deleteAllExercises(req.params.id);
+    const result = await deleteAllExercisesAdmin(req.params.id);
     // Check if there is a error in the result
     if (result.error) {
       // There was a error
@@ -75,4 +75,4 @@ const deleteAll = async (req, res, next) => {
   }
 };
 
-export {getAllExercises, PostExercise, deleteExercise, deleteAll};
+export {getAllExercises, PostExercise, deleteExercise, deleteAllExercises};

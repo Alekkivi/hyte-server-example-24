@@ -1,5 +1,5 @@
 import express from 'express';
-import {body} from 'express-validator';
+import {body, param} from 'express-validator';
 import {
   postEntry,
   getEntries,
@@ -43,7 +43,19 @@ entryRouter.route('/').delete(authenticateToken,
 
 
 // /entries/:id endpoint
-entryRouter.route('/:id').get(authenticateToken, getEntryById);
-
+entryRouter
+    .route('/:id')
+    .get(
+        authenticateToken,
+        param('id', 'must be integer').isInt(),
+        validationErrorHandler,
+        getEntryById,
+    )
+    .delete(
+        authenticateToken,
+        param('id', 'must be integer').isInt(),
+        validationErrorHandler,
+        deleteEntry,
+    );
 
 export default entryRouter;

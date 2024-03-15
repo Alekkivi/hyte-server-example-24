@@ -52,7 +52,7 @@ const deleteExerciseByUser = async (exerciseId, userId) => {
   }
 };
 
-const deleteAllExercises = async (id) => {
+const deleteAllExercisesAdmin = async (id) => {
   try {
     const sql = 'DELETE FROM Exercises WHERE user_id=?';
     const params = [id];
@@ -71,4 +71,4 @@ const deleteAllExercises = async (id) => {
 };
 
 
-export {getAllExercisesWithUserId, addExercise, deleteExerciseByUser, deleteAllExercises};
+export {getAllExercisesWithUserId, addExercise, deleteExerciseByUser, deleteAllExercisesAdmin};
