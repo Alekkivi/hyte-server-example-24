@@ -18,10 +18,9 @@ const port = 3000;
 const app = express();
 
 app.use(cors());
-
+app.use(logger);
 app.use(express.json());
 
-app.use(logger);
 
 // Staattinen sivusto palvelimen juureen
 app.use(express.static('public'));

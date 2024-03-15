@@ -15,28 +15,31 @@ const entryRouter = express.Router();
 
 
 // /entries endpoint
-entryRouter.route('/').get(authenticateToken, getEntries)
-    .post(authenticateToken,
-        body('entry_date').isDate(),
-        body('mood_color').isString(),
-        body('weight').isFloat(),
-        body('sleep_hours').isInt({min: 0, max: 24}),
-        body('notes').isString(),
-        validationErrorHandler,
-        postEntry)
-    .put(authenticateToken,
-        body('entry_id').isInt(),
-        body('entry_date').isDate(),
-        body('mood_color').isString(),
-        body('weight').isFloat(),
-        body('sleep_hours').isFloat(),
-        body('notes').isString(),
-        validationErrorHandler,
-        putEntry)
-    .delete(authenticateToken,
-        body('entry_id').isInt(),
-        validationErrorHandler,
-        deleteEntry);
+entryRouter.route('/').get(authenticateToken, getEntries);
+
+entryRouter.route('/').post(authenticateToken,
+    body('entry_date').isDate(),
+    body('mood_color').isString(),
+    body('weight').isFloat(),
+    body('sleep_hours').isInt({min: 0, max: 24}),
+    body('notes').isString(),
+    validationErrorHandler,
+    postEntry);
+
+entryRouter.route('/').put(authenticateToken,
+    body('entry_id').isInt(),
+    body('entry_date').isDate(),
+    body('mood_color').isString(),
+    body('weight').isFloat(),
+    body('sleep_hours').isFloat(),
+    body('notes').isString(),
+    validationErrorHandler,
+    putEntry);
+
+entryRouter.route('/').delete(authenticateToken,
+    body('entry_id').isInt(),
+    validationErrorHandler,
+    deleteEntry);
 
 
 // /entries/:id endpoint
