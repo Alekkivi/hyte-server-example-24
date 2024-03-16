@@ -37,7 +37,9 @@ const listAllUsers = async () => {
 // Get specific user in db
 const selectUserById = async (id) => {
   try {
-    const sql = 'SELECT * FROM Users WHERE user_id=?';
+    const sql =
+      // eslint-disable-next-line max-len
+      'SELECT username, user_id, email, created_at, user_level from Users where user_id=?';
     const params = [id];
     const [rows] = await promisePool.query(sql, params);
     // if nothing is found with the user id, result array is empty []
@@ -45,7 +47,6 @@ const selectUserById = async (id) => {
       return {error: 404, message: 'user not found'};
     }
     // Remove password property from result
-    delete rows[0].password;
     return rows[0];
   } catch (error) {
     console.error('selectUserById', error);
