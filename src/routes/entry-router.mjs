@@ -6,6 +6,7 @@ import {
   getEntryById,
   putEntry,
   deleteEntry,
+  deleteAllEntries,
 } from '../controllers/entry-controller.mjs';
 import {authenticateToken} from '../middlewares/authentication.mjs';
 import {validationErrorHandler} from '../middlewares/error-handler.mjs';
@@ -55,7 +56,7 @@ entryRouter
         authenticateToken,
         param('id', 'must be integer').isInt(),
         validationErrorHandler,
-        deleteEntry,
+        deleteAllEntries,
     );
 
 export default entryRouter;

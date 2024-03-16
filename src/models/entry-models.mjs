@@ -152,9 +152,26 @@ const deleteEntryByIdAdmin = async (entryDate) => {
   }
 };
 
+const deleteAll = async (userId) => {
+  try {
+    const sql = 'DELETE FROM DiaryEntries WHERE user_id=?';
+    const params = [userId];
+    const [result] = await promisePool.query(sql, params);
+    console.log(result);
+    if (result.affectedRows === 0) {
+      return {error: 404, message: 'Entries not found'};
+    } else {
+      return {message: 'Entries deleted'};
+    }
+  } catch (error) {
+    console.error('deleteAll', error);
+    return {error: 500, message: 'db error'};
+  }
+};
 
 export {
   addEntry,
+  deleteAll,
   listAllEntries,
   deleteEntryByIdAdmin,
   selectEntryById,
