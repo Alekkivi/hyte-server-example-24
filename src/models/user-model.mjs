@@ -38,8 +38,16 @@ const listAllUsers = async () => {
 const selectUserById = async (id) => {
   try {
     const sql =
-      // eslint-disable-next-line max-len
-      'SELECT username, user_id, email, created_at, user_level from Users where user_id=?';
+      `SELECT
+        username AS 'Username',
+        user_id AS 'User ID',
+        email AS 'Email',
+        created_at AS 'Created at',
+        user_level AS 'User level'
+      FROM
+          Users
+      WHERE
+          user_id=?;`;
     const params = [id];
     const [rows] = await promisePool.query(sql, params);
     // if nothing is found with the user id, result array is empty []
