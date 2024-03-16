@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import promisePool from '../utils/database.mjs';
 
 // Get all users in database - For admin
@@ -5,27 +6,14 @@ const listAllUsers = async () => {
   try {
     // Get user data, exercise count and diary entry count.
     const sql = `
-        SELECT
-        u.user_id,
-        u.username,
-        u.email,
-        u.created_at,
-        u.user_level,
-        COUNT(DISTINCT de.entry_id) AS diary_entry_count,
-        COUNT(DISTINCT ex.exercise_id) AS exercise_count
+    SELECT
+      user_id,
+      username,
+      email,
+      created_at,
+      user_level
     FROM
-        Users u
-    LEFT JOIN
-        DiaryEntries de ON u.user_id = de.user_id
-    LEFT JOIN
-        Exercises ex ON u.user_id = ex.user_id
-    GROUP BY
-        u.user_id,
-        u.username,
-        u.email,
-        u.created_at,
-        u.user_level;
-    `;
+        Users;`;
     // Returns a empty list if no users found
     const [rows] = await promisePool.query(sql);
     return rows;
@@ -39,15 +27,17 @@ const selectUserById = async (id) => {
   try {
     const sql =
       `SELECT
-        username AS 'Username',
-        user_id AS 'User ID',
-        email AS 'Email',
-        created_at AS 'Created at',
-        user_level AS 'User level'
+          u.username AS 'Username',
+          u.user_id AS 'User ID',
+          u.email AS 'Email',
+          u.created_at AS 'Created at',
+          u.user_level AS 'User level',
+          (SELECT COUNT(*) FROM DiaryEntries WHERE user_id = u.user_id) AS 'Diary entry count',
+          (SELECT COUNT(*) FROM Exercises WHERE user_id = u.user_id) AS 'Exercise count'
       FROM
-          Users
+          Users u
       WHERE
-          user_id=?;`;
+          u.user_id =?;`;
     const params = [id];
     const [rows] = await promisePool.query(sql, params);
     // if nothing is found with the user id, result array is empty []
