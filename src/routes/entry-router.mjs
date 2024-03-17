@@ -14,7 +14,6 @@ import {validationErrorHandler} from '../middlewares/error-handler.mjs';
 // eslint-disable-next-line new-cap
 const entryRouter = express.Router();
 
-
 // /entries endpoint
 entryRouter.route('/').get(authenticateToken, getEntries);
 

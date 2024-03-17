@@ -31,6 +31,7 @@ const __dirname = path.dirname(__filename);
 
 // Tarjoiltava kansio määritellään ns. Relatiivisella polulla
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
+app.use('/', express.static(path.join(__dirname, '../public')));
 
 app.use('/items', itemRouter);
 app.use('/api/users', userRouter);
