@@ -30,10 +30,25 @@ const getUsers = async (req, res, next) => {
 
 // Get specific user using request parameters
 const getUserById = async (req, res, next) => {
+  const userLevel = req.user.user_level;
+  const paramId = req.params.id;
+  const userId = req.user.user_id;
+  console.log('meneeeeee', userId, paramId)
+  let result;
   // Check if token is linked to admin user
-  if (req.user.user_level === 'admin') {
-    const result = await selectUserById(req.params.id);
-    // Check for error in result
+  if (userLevel === 'admin') {
+    result = await selectUserById(paramId);
+    if (result.error) {
+      // Forward to errorhandler if result contains a error
+      next(customError(result.message, result.error));
+    } else {
+      // Send response containing user, if there are no errors
+      return res.json(result);
+    }
+    // Check for error in resul
+  } else if (userLevel === 'regular' && paramId == userId) {
+    console.log('Userid matches param and')
+    result = await selectUserById(userId);
     if (result.error) {
       // Forward to errorhandler if result contains a error
       next(customError(result.message, result.error));
