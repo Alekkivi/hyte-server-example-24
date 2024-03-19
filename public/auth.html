@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodMate</title>
+    <script type="module" crossorigin src="/assets/auth-DKg1xx8u.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/universal-styles-Dbk1WByh.js">
+    <link rel="modulepreload" crossorigin href="/assets/fetch-qW78LKou.js">
+    <link rel="stylesheet" crossorigin href="/assets/universal-styles-B20YUmrl.css">
+    <link rel="stylesheet" crossorigin href="/assets/auth-CMCli__5.css">
+  </head>
+  <body>
+    <!-- Navigation -->
+    <header>
+      <h1><a href="index.html" class="logo"><img src="/moodmate_logo.png" alt="Logo"></a></h1>
+      <nav class="navigation">
+        <a href="index.html">Home</a>
+        <a href="index.html#about">About</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="./auth.html">Log in</a>
+      </nav>
+    </header>
+
+      <!-- Container to set min-height -->
+      <div class="container">
+
+      <!-- Introduction section -->
+      <section class="introduction" id="landing">
+        <div id="introduction-content">
+          <h2>Each entry is a step to self-discovery<br><span>Start your jorney now</span></h2>
+        </div>
+      </section>
+
+      <!-- Both forms section -->
+      <section class="both-forms">
+        <!-- Login form -->
+        <form class="login_form">
+          <h2>Login</h2> <!-- Header for the login form -->
+          <label for="login_username">Username</label>
+          <input type="text" id="login_username" name="username" placeholder="Username" required minlength="3" maxlength="50">
+          <label for="login_password">Password</label>
+          <input type="password" id="login_password" name="password" placeholder="Password" required minlength="3" maxlength="100">
+          <input
+            name="submit"
+            type="submit"
+            value="Login"
+            class="loginuser">
+        </form>
+
+        <!-- Create new account form -->
+        <form class="create_user_form">
+          <h2>Create Account</h2> <!-- Header for the create account form -->
+          <label for="new_username">Username</label>
+          <input type="text" id="new_username" name="username" placeholder="New username" required minlength="3" maxlength="50">
+          <label for="new_password">Password</label>
+          <input type="password" id="new_password" name="password" placeholder="New password" required minlength="3" maxlength="100">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="Email" required>
+          <input
+            name="submit"
+            type="submit"
+            value="Create account"
+            class="createuser">
+        </form>
+      </section>
+    </div>
+
+    <!-- Snackbar -->
+    <div id="snackbar-target"></div>
+
+    <!-- Footer -->
+    <footer>
+      <p>Copyright © 2030 MoodMate. All rights reserved.</p>
+      <p>Just kidding</p>
+    </footer>
+
+     <!-- Script -->
+  </body>
+</html>
+

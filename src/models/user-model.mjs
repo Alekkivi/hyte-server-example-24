@@ -42,7 +42,7 @@ const selectUserById = async (id) => {
     const [rows] = await promisePool.query(sql, params);
     // if nothing is found with the user id, result array is empty []
     if (rows.length === 0) {
-      return {error: 404, message: 'user not found'};
+      return {error: 404, message: 'User not found'};
     }
     // Remove password property from result
     return rows[0];
@@ -63,7 +63,7 @@ const insertUser = async (user) => {
   } catch (error) {
     console.error('insertUser', error);
     if (error.errno == 1062) {
-      return {error: 409, message: 'Username taken or email'};
+      return {error: 409, message: 'Username or email address taken'};
     } else {
       return {error: 500, message: 'db error'};
     }
@@ -81,7 +81,7 @@ const updateUserById = async (user) => {
     // Check were any rows affected
     if (result.affectedRows === 0) {
       // 0 Affected rows mean that matching user_id was not found
-      return {error: 404, message: 'User id not found in the database.'};
+      return {error: 404, message: 'Matching User ID not found'};
     } else {
       // Request ok
       return {message: 'user data updated', user_id: user.user_id};
@@ -91,7 +91,7 @@ const updateUserById = async (user) => {
     // Lack of username/email uniqueness will raise a error
     if (error.errno === 1062) {
       // If username/email was not unique, return conflict response
-      return {error: 409, message: 'Username or email taken'};
+      return {error: 409, message: 'Username or email address taken'};
     } else {
       // Return generic database error
       return {error: 500, message: 'db error'};
@@ -109,9 +109,9 @@ const deleteUserById = async (id) => {
 
     // User id not found
     if (result.affectedRows === 0) {
-      return {error: 404, message: 'user not found'};
+      return {error: 404, message: 'User not found'};
     }
-    return {message: 'user deleted', user_id: id};
+    return {message: 'User deleted', user_id: id};
   } catch (error) {
     // note that users with other data (FK constraint) cant be deleted directly
     if (error.errno === 1451) {
@@ -129,7 +129,7 @@ const selectUserByUsername = async (username) => {
     const [rows] = await promisePool.query(sql, params);
     // if nothing is found with the username and password
     if (rows.length === 0) {
-      return {error: 401, message: 'invalid username or password'};
+      return {error: 401, message: 'Invalid username or password'};
     }
     return rows[0];
   } catch (error) {
