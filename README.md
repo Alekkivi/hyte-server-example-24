@@ -26,7 +26,19 @@ Only users with the regular user level have restricted access. Admin users have 
 All queries and responses are detailed in the API documentation
 You can access this documentation by two ways:
 - When the server is running, documentation can be found [here](https://hyte-server-aleksi.northeurope.cloudapp.azure.com/docs).
+- You can run `npm run docs` to generate docs to localhost
 
+## Authentication
+Authentication for this API is performed using JSON Web Tokens (JWT) with the Bearer authentication scheme.
+
+To obtain a JWT token, you need to perform authentication using your credentials (username and password) through the authentication endpoint `/api/auth/login`. Upon successful authentication, you will receive a JWT token in the response.
+
+Include the obtained JWT token in the Authorization header of your HTTP requests using the Bearer scheme:
+```
+Authorization: Bearer <token>
+```
+
+These tokens have expiration time of 24-hours. Once expired, you will need to obtain a new token by re-authenticating.
 
 ## Endpoint `api/auth`
 
