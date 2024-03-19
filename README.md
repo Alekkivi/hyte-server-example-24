@@ -24,6 +24,9 @@ Only users with the regular user level have restricted access. Admin users have 
 
 ## Resources and endpoints
 All queries and responses are detailed in the API documentation
+You can access this documentation by two ways:
+- When the server is running, documentation can be found [here](https://hyte-server-aleksi.northeurope.cloudapp.azure.com/docs).
+
 
 ## Endpoint `api/auth`
 
