@@ -222,7 +222,7 @@ userRouter
             .trim().isLength({min: 3, max: 20}).isAlphanumeric(),
         body('password', 'Password should be between 3-128 characters')
             .trim().isLength({min: 3, max: 128}),
-        body('email').trim().isEmail(),
+        body('email', 'Invalid email address').trim().isEmail(),
         validationErrorHandler,
         putUser)
     // user registration with validation
@@ -231,7 +231,7 @@ userRouter
             .trim().isLength({min: 3, max: 20}).isAlphanumeric(),
         body('password', 'Password should be between 3-128 characters')
             .trim().isLength({min: 3, max: 128}),
-        body('email').trim().isEmail(),
+        body('email', 'Invalid email address').trim().isEmail(),
         validationErrorHandler,
         postUser,
     );
