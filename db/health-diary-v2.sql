@@ -19,7 +19,7 @@ CREATE TABLE DiaryEntries (
     entry_date DATE NOT NULL,
     mood_color VARCHAR(50),
     weight DECIMAL(5,2),
-    sleep_hours INT,
+    sleep_hours DECIMAL(5,2),
     notes TEXT,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES Users(user_id)
