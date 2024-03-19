@@ -10,7 +10,7 @@ const authenticateToken = (req, res, next) => {
 
   if (token == null) {
     // There was no bearer token in the request
-    next(customError('Bearer token missing', 401));
+    next(customError('Invalid Bearer token', 403));
   } else {
     try {
       req.user = jwt.verify(token, process.env.JWT_SECRET);

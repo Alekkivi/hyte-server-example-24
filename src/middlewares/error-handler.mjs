@@ -1,7 +1,5 @@
 import {validationResult} from 'express-validator';
 
-
-/* eslint-disable linebreak-style */
 const customError = (message, status, errors) => {
   const error = new Error(message);
   error.status = status || 500;

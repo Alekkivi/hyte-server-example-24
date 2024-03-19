@@ -1,87 +1,211 @@
-# Hyte example backend server
 
-## Description
-This is a server made with Node.Js and Express
-start dev server: `npm run dev` / `npm start`
+# MoodMate API
+
+Welcome to the backend server for MoodMate, developed as part of the Web Development course at Metropolia University of Applied Sciences. MoodMate is a web application designed to help users track their mood and overall well-being.
+
+Node.js + Express application.
+
+## Purpose
+The primary goal of this backend server is to provide a reliable and efficient infrastructure to support the MoodMate application and provide insight into full-stack web Development.
+
+## Usage
+- Clone, download or copy repository
+- Run `npm i` inside project folder
+- Install necessary packages
+- Run database script from `db/` folder
+- Use `.env-sample` as a base for your `.env` file
+- Start dev server with `npm run dev` or `npm start`
 
 
-## Users
-### Create a new user
-POST http://127.0.0.1:3000/api/users
-Example request formatting:
+## Features
+This API supports two user levels: Regular and Admin. The server's features depend on the user level.
+
+Only users with the regular user level have restricted access. Admin users have unrestricted access and can perform any action that regular users can.
+
+## Resources and endpoints
+All queries and responses are detailed in the API documentation
+
+## Endpoint `api/auth`
+
+### Login
+```
+POST http://localhost:3000/api/auth/login
+content-type: application/json
 {
-    "username":"example_username",
-    "password":"example_password",
-    "email":"example@email.com"
+  "username": "johnDoe",
+  "password": "Secret"
 }
+```
 
-### Log in to a existing user
-POST http://127.0.0.1:3000/api/auth/login
-Example request formatting:
+### Get information about me (Token needed)
+```
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer <token>
+```
+
+## Endpoint `api/users`
+
+### Create user / Registeration
+```
+POST http://localhost:3000/api/users
+content-type: application/json
 {
-    "username":"example_username",
-    "password":"example_password"
+  "username": "johnDoe",
+  "password": "secret",
+  "email":" john@doe.com
 }
-Successfull login will return information about the user. Including the token.
-
-### Get user info with token (Requires token)
-GET http://127.0.0.1:3000/api/auth/me
+```
 
 ### Get all users (requires admin token)
-GET http://127.0.0.1:3000/api/users
+```
+GET http://localhost:3000/api/users
+Authorization: Bearer <token>
+```
 
-### Update user information (requires regular token)
-POST http://127.0.0.1:3000/api/users
+### Get user via user ID (requires admin token)
+```
+GET http://localhost:3000/api/users/2
+Authorization: Bearer <token>
+```
+
+### Delete user via user ID (requires admin token)
+```
+DELETE http://localhost:3000/api/users/2
+Authorization: Bearer <token>
+```
+
+### Update user information
+```
+PUT http://localhost:3000/api/users
+content-type: application/json
+Authorization: Bearer <token>
 {
-    "username":"new_username",
-    "password":"new_password",
-    "email":"new@email.com"
+  "username": "johnDoe2",
+  "password": "secret23",
+  "email":" john2@doe.com
 }
+```
 
-### Delete user (requires token)
-With regular token you can only delete your own user profile
-With admin token you can delete any user
+### Get all users (requires admin token)
+```
+GET http://localhost:3000/api/users
+Authorization: Bearer <token>
+```
 
+### Get user via user ID (requires admin token)
+```
+GET http://localhost:3000/api/users/2
+Authorization: Bearer <token>
+```
 
-## Entries
-### Get all entries (Requires regular token)
-GET http://127.0.0.1:3000/api/entries
+## Endpoint `api/entries`
 
-Returned data varies based on user level
-If the token is attached to a admin user
---> All entries in db are returned
+### Get all entries from the server (requires admin token)
+```
+GET http://localhost:3000/api/entries
+Authorization: Bearer <token>
+```
 
-else
---> All entries belonging to the user are returned
+### Get all own entries (Regular token)
+```
+GET http://localhost:3000/api/entries
+Authorization: Bearer <token>
+```
 
-### Get specific user entires (Requires admin token)
-GET http://127.0.0.1:3000/api/entries/id
-where id is the user_id of a specific user
+### Get all entries from specific user via user ID (requires admin token)
+```
+GET http://localhost:3000/api/entries/:id
+Authorization: Bearer <token>
+```
 
-### Update a specific entry using entry_date (requires regular token)
-PUT http://127.0.0.1:3000/api/entries/id
-Example request formatting:
-{
-    "entry_date":"2012-12-12",
-    "mood":"Hopefull",
-    "weight":"55",
-    "sleep_hours": "6",
-    "notes":"This actually works??"
-}
-The example request will update the diary entry with corresponding entry_date
-
-### Post a new entry (requeires token)
+### Add entry (Requires any token)
+```
+POST http://localhost:3000/api/entries
+content-type: application/json
+Authorization: Bearer <token>
 {
   "entry_date": "2024-02-12",
-  "mood": "Happy",
+  "mood_color": "green",
   "weight": 69.6,
   "sleep_hours": 7,
-  "notes": "This was a good day",
+  "notes": "This was a good day"
 }
+```
 
-### Delete a specific entry using entry_id (requires token)
-DELETE http://127.0.0.1:3000/api/entries/id
-Where id is the entry_id of a specific entry
+### Modify entry (Requires any token)
+```
+PUT http://localhost:3000/api/entries
+content-type: application/json
+Authorization: Bearer <token>
+{
+  "entry_id": 5.
+  "entry_date": "2024-02-12",
+  "mood_color": "Green",
+  "weight": 69.6,
+  "sleep_hours": 7,
+  "notes": "This was a good day"
+}
+```
 
-Regular user can only remove diary entries that they have made
-With admin token you can delete any diary entry based on id from the URL
+### Delete entry via entry ID (Requires any token)
+```
+DELETE http://localhost:3000/api/entries
+content-type: application/json
+Authorization: Bearer <token>
+{
+  "entry_id": 5.
+}
+```
+
+### Delete all entries via user ID (Requires admin token)
+```
+DELETE http://localhost:3000/api/entries/:id
+Authorization: Bearer <token>
+```
+
+## Endpoint `api/exercises`
+
+### Get all own exercises (Regular token)
+```
+GET http://localhost:3000/api/exercises
+Authorization: Bearer <token>
+```
+
+### Add exercise (Requires any token)
+```
+POST http://localhost:3000/api/exercises
+content-type: application/json
+Authorization: Bearer <token>
+{
+  "entry_date": "2024-02-12",
+  "duration": 20,
+  "intensity": "demanding",
+  "activity": "Hiking"
+}
+```
+
+### Delete all exercises via user ID (Requires admin token)
+```
+DELETE http://localhost:3000/api/exercises/:id
+Authorization: Bearer <token>
+```
+
+### Delete any exercise via exercise ID (Requires admin token)
+```
+DELETE http://localhost:3000/api/exercises/
+content-type: application/json
+Authorization: Bearer <token>
+{
+    "exercise_id": 6
+}
+```
+
+### Delete own exercises via exercise ID (Requires any token)
+```
+DELETE http://localhost:3000/api/exercises/
+content-type: application/json
+Authorization: Bearer <token>
+{
+    "exercise_id": 6
+}
+```

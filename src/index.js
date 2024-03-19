@@ -1,50 +1,42 @@
-// Main JS file
-import express from 'express';
-import path from 'path';
-import {fileURLToPath} from 'url';
-import cors from 'cors';
+import {errorHandler, notFoundHandler} from './middlewares/error-handler.mjs';
+import exerciseRouter from './routes/exercise-router.mjs';
+import entryRouter from './routes/entry-router.mjs';
 import itemRouter from './routes/item-router.mjs';
 import userRouter from './routes/user-router.mjs';
-import entryRouter from './routes/entry-router.mjs';
-import exerciseRouter from './routes/exercise-router.mjs';
-import logger from './middlewares/logger.mjs';
 import authRouter from './routes/auth-router.mjs';
-import {errorHandler, notFoundHandler} from './middlewares/error-handler.mjs';
-
+import logger from './middlewares/logger.mjs';
+import {fileURLToPath} from 'url';
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
 
 // Define the host
 const hostname = '127.0.0.1';
 const port = 3000;
+// Create express instance
 const app = express();
-
+// Middleware for enabling CORS
 app.use(cors());
+// Middleware for logging HTTP requests
 app.use(logger);
+// Middleware for parsing JSON bodies of incoming requests
 app.use(express.json());
-
-
 // Staattinen sivusto palvelimen juureen
 app.use(express.static('public'));
-
-// staattinen sivusto ali-url-osoitteessa
+// Serve static files from the 'docs' directory at the '/docs' URL
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Tarjoiltava kansio määritellään ns. Relatiivisella polulla
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
-app.use('/', express.static(path.join(__dirname, '../public')));
-
+// Direct requests to correct routers
 app.use('/items', itemRouter);
 app.use('/api/users', userRouter);
 app.use('/api/entries', entryRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/exercises', exerciseRouter);
-
-// 404 not found middleware
+// Middleware for handling 404 errors
 app.use(notFoundHandler);
-
-// Error handler for the rest of error cases
+// Middleware for handling other errors
 app.use(errorHandler);
-
 // Start the server
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);

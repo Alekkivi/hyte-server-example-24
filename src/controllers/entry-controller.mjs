@@ -74,7 +74,7 @@ const putEntry = async (req, res, next) => {
   const result = await updateEntryById({userId, ...req.body});
   if (result.error) {
     // Forward to errorhandler if result contains a error
-    next(new Error(result.message, result.error));
+    return next(customError(result.message, result.error));
   } else {
     // Respond with OK-status, if there was no errors
     return res.status(201).json(result);
@@ -96,7 +96,7 @@ const deleteEntry = async (req, res, next) => {
   }
   if (result.error) {
     // Forward to errorhandler, if result contains a error
-    next(new Error(result.message, result.error));
+    next(customError(result.message, result.error));
   } else {
     // Respond with OK-status, if there was no errors
     return res.json(result);
