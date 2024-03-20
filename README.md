@@ -8,6 +8,9 @@ Node.js + Express application.
 ## Purpose
 The primary goal of this backend server is to provide a reliable and efficient infrastructure to support the MoodMate application and provide insight into full-stack web Development.
 
+## Structure
+The RMC REST API follows a standard RESTful architecture, utilizing HTTP methods such as GET, POST, PUT, DELETE for CRUD (Create, Read, Update, Delete) operations. 
+
 ## Usage
 - Clone, download or copy repository
 - Run `npm i` inside project folder
