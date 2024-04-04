@@ -26,25 +26,13 @@ const listAllUsers = async () => {
 const selectUserById = async (id) => {
   try {
     const sql =
-      `SELECT
-          u.username AS 'Username',
-          u.user_id AS 'User ID',
-          u.email AS 'Email',
-          u.created_at AS 'Created at',
-          u.user_level AS 'User level',
-          (SELECT COUNT(*) FROM DiaryEntries WHERE user_id = u.user_id) AS 'Diary entry count',
-          (SELECT COUNT(*) FROM Exercises WHERE user_id = u.user_id) AS 'Exercise count'
-      FROM
-          Users u
-      WHERE
-          u.user_id =?;`;
+      `SELECT user_id, username, user_level, created_at from Users`;
     const params = [id];
     const [rows] = await promisePool.query(sql, params);
     // if nothing is found with the user id, result array is empty []
     if (rows.length === 0) {
       return {error: 404, message: 'User not found'};
     }
-    // Remove password property from result
     return rows[0];
   } catch (error) {
     console.error('selectUserById', error);
@@ -52,16 +40,35 @@ const selectUserById = async (id) => {
   }
 };
 
+
 // create new user in db
 const insertUser = async (user) => {
   try {
     const sql =
-      'INSERT INTO Users (username, password, email) VALUES (?, ?, ?)';
-    const params = [user.username, user.password, user.email];
+      'INSERT INTO Users (username, password, user_level, full_name) VALUES (?, ?, ?, ?)';
+    const params = [user.username, user.password, user.user_level, user.full_name];
     const [result] = await promisePool.query(sql, params);
     return {message: 'new user created', user_id: result.insertId};
   } catch (error) {
     console.error('insertUser', error);
+    if (error.errno == 1062) {
+      return {error: 409, message: 'Username or email address taken'};
+    } else {
+      return {error: 500, message: 'db error'};
+    }
+  }
+};
+
+// create new user in db
+const insertDoctor = async (username, password, fullname, userLevel) => {
+  try {
+    const sql =
+      'INSERT INTO Users (username, password, full_name, user_level) VALUES (?, ?, ?, ?)';
+    const params = [username, password, fullname, userLevel];
+    const [result] = await promisePool.query(sql, params);
+    return {message: 'new user created', user_id: result.insertId};
+  } catch (error) {
+    console.error('insertDoctor', error);
     if (error.errno == 1062) {
       return {error: 409, message: 'Username or email address taken'};
     } else {
@@ -138,6 +145,41 @@ const selectUserByUsername = async (username) => {
   }
 };
 
+const selectUserByEmail = async (email) => {
+  try {
+    const sql = 'SELECT * FROM Users WHERE username=?';
+    const params = [email];
+    const [rows] = await promisePool.query(sql, params);
+    // if nothing is found with the user id, result array is empty []
+    if (rows.length === 0) {
+      return {error: 404, message: 'user not found'};
+    }
+    // Remove the password field from the returned user object
+    delete rows[0].password;
+    return rows[0];
+  } catch (error) {
+    console.error('selectUserByEmail', error);
+    return {error: 500, message: 'db error'};
+  }
+};
+
+const selectDoctorByEmail = async (email) => {
+  try {
+    const sql = 'SELECT * FROM Users WHERE username=? and user_level="doctor"';
+    const params = [email];
+    const [rows] = await promisePool.query(sql, params);
+    // if nothing is found with the user id, result array is empty []
+    if (rows.length === 0) {
+      return {error: 404, message: 'user not found'};
+    }
+    return rows[0];
+  } catch (error) {
+    console.error('selectUserByEmail', error);
+    return {error: 500, message: 'db error'};
+  }
+};
+
+
 export {
   selectUserByUsername,
   listAllUsers,
@@ -145,4 +187,7 @@ export {
   insertUser,
   updateUserById,
   deleteUserById,
+  selectUserByEmail,
+  insertDoctor,
+  selectDoctorByEmail,
 };

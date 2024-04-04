@@ -1,7 +1,6 @@
 import {errorHandler, notFoundHandler} from './middlewares/error-handler.mjs';
-import exerciseRouter from './routes/exercise-router.mjs';
+import kubiosRouter from './routes/kubios-router.mjs';
 import entryRouter from './routes/entry-router.mjs';
-import itemRouter from './routes/item-router.mjs';
 import userRouter from './routes/user-router.mjs';
 import authRouter from './routes/auth-router.mjs';
 import logger from './middlewares/logger.mjs';
@@ -28,11 +27,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use('/docs', express.static(path.join(__dirname, '../docs')));
 // Direct requests to correct routers
-app.use('/items', itemRouter);
 app.use('/api/users', userRouter);
 app.use('/api/entries', entryRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/exercises', exerciseRouter);
+app.use('/api/kubios', kubiosRouter);
 // Middleware for handling 404 errors
 app.use(notFoundHandler);
 // Middleware for handling other errors

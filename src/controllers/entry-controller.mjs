@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 import {
   addEntry,
-  deleteAll,
   listAllEntries,
   selectEntryById,
   updateEntryById,
@@ -103,21 +102,6 @@ const deleteEntry = async (req, res, next) => {
   }
 };
 
-const deleteAllEntries = async (req, res, next) => {
-  if (req.user.user_level === 'admin') {
-    const result = await deleteAll(req.params.id);
-    if (result.error) {
-      // Forward to errorhandler if result contains a error
-      next(customError(result.message, 404));
-    } else {
-      // Send response containing entires, if there are no errors
-      return res.json(result);
-    }
-  } else {
-    // Unauthorized user was trying to reach this function
-    next(customError('Unauthorized', 401));
-  }
-};
 
 export {
   getEntries,
@@ -125,5 +109,4 @@ export {
   putEntry,
   deleteEntry,
   postEntry,
-  deleteAllEntries,
 };

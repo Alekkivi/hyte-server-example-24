@@ -1,7 +1,9 @@
 import bcrypt from 'bcryptjs';
+import 'dotenv/config';
 import {customError} from '../middlewares/error-handler.mjs';
 import {
   deleteUserById,
+  insertDoctor,
   insertUser,
   listAllUsers,
   selectUserById,
@@ -33,7 +35,7 @@ const getUserById = async (req, res, next) => {
   const userLevel = req.user.user_level;
   const paramId = req.params.id;
   const userId = req.user.user_id;
-  console.log('meneeeeee', userId, paramId)
+  console.log('meneeeeee', userId, paramId);
   let result;
   // Check if token is linked to admin user
   if (userLevel === 'admin') {
@@ -47,7 +49,7 @@ const getUserById = async (req, res, next) => {
     }
     // Check for error in resul
   } else if (userLevel === 'regular' && paramId == userId) {
-    console.log('Userid matches param and')
+    console.log('Userid matches param and');
     result = await selectUserById(userId);
     if (result.error) {
       // Forward to errorhandler if result contains a error
@@ -80,6 +82,32 @@ const postUser = async (req, res, next) => {
     next(customError(result.message, result.error));
   } else {
     // Respond with a ok status - User created successfully
+    return res.status(201).json(result);
+  }
+};
+
+const postDoctor = async (req, res, next) => {
+  const {username, password, full_name, admin_password} = req.body;
+  if (admin_password !== process.env.APPLICATION_ADMIN_PASSWORD) {
+    next(customError('You are not a StressLess application admin', 401));
+    return;
+  }
+  // Generate salt to hash password
+  const salt = await bcrypt.genSalt(10);
+  // Apply salt and hash
+  const hashedPassword = await bcrypt.hash(password, salt);
+  const result = await insertDoctor(
+      username,
+      hashedPassword,
+      full_name,
+      'doctor',
+  );
+  // Check for error in result
+  if (result.error) {
+    // Forward to error handler if result contains an error
+    next(customError(result.message, result.error));
+  } else {
+    // Respond with an OK status - User created successfully
     return res.status(201).json(result);
   }
 };
@@ -125,4 +153,4 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-export {getUsers, getUserById, postUser, putUser, deleteUser};
+export {getUsers, getUserById, postUser, putUser, deleteUser, postDoctor};
